@@ -19,7 +19,7 @@ from foot_gait import coordinated_trot_terms, gait_terms, planted_foot_cost, tro
 from hip_splay import hip_splay
 from air_time import AirTimeReward
 from base_height_objective import BASE_HEIGHT_SPEC,low_base_cost
-from directional_amp import guide_mixed_targets
+from directional_amp import fallback_mixed_targets, guide_mixed_targets
 from geometry import rpy_matrix,rot6d,rotation_error,base_to_heading,heading_to_base,damped_ik
 
 @configclass
@@ -104,7 +104,10 @@ class DuetEnv(DualModeEnv):
             c=apply_velocity_deadzone(c)
             if self.cfg.directional_amp and hasattr(self,'amp_command_bank'):
                 scale, reference, signatures=self.amp_command_bank
-                c=scale*guide_mixed_targets(c/scale,caps/scale,reference,signatures)
+                guided=guide_mixed_targets(c/scale,caps/scale,reference,signatures)
+                if self.training_stage==1:
+                    guided=fallback_mixed_targets(guided,reference,signatures)
+                c=scale*guided
             self.command_targets[ids,:3]=c;self.command_targets[ids,3]=0
             if self.training_stage==1:
                 cap=np.deg2rad(self.guidance_cap_deg)

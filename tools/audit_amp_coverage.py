@@ -13,7 +13,8 @@ parser.add_argument("--samples", type=int, default=200_000)
 args = parser.parse_args()
 sys.path.insert(0, str(args.package.resolve()))
 from base_commands import apply_velocity_deadzone
-from directional_amp import DirectionalAMP, command_signature, guide_mixed_targets, matched_references
+from directional_amp import (DirectionalAMP, command_signature, fallback_mixed_targets,
+                             guide_mixed_targets, matched_references)
 
 
 def targets(n, cap, rng):
@@ -36,6 +37,7 @@ def main():
     torch.set_num_threads(2)
     amp = DirectionalAMP(args.package / "amp_reference", SimpleNamespace(device="cpu", num_envs=1, step_dt=.02))
     rng = torch.Generator().manual_seed(20261110)
+    fallback_rng = torch.Generator().manual_seed(20261111)
     report = {"clips": len(amp.metadata["clips"]), "signatures": len(amp.clip_signatures.unique(dim=0)),
               "speed_distance": amp.metadata["max_normalized_speed_distance"], "courses": []}
     for scale in (.50, .75, 1.):
@@ -47,16 +49,26 @@ def main():
             matches, _ = matched_references(batch, amp.clip_commands, amp.clip_signatures)
             guided = guide_mixed_targets(batch, batch.new_full((3,), scale), amp.clip_commands, amp.clip_signatures, rng)
             guided_matches, _ = matched_references(guided, amp.clip_commands, amp.clip_signatures)
+            final = fallback_mixed_targets(guided, amp.clip_commands, amp.clip_signatures, fallback_rng)
+            final_matches, _ = matched_references(final, amp.clip_commands, amp.clip_signatures)
+            changed = (final != guided).any(dim=-1)
+            kept_axes = command_signature(final).count_nonzero(dim=-1)
             grouped.append(torch.stack((direction.count_nonzero(dim=1)>1, support, matches.any(dim=-1),
-                                        guided_matches.any(dim=-1)), dim=-1))
-        mixed, sign_match, speed_match, guided = torch.cat(grouped).unbind(-1)
+                                        guided_matches.any(dim=-1), final_matches.any(dim=-1),
+                                        changed & (kept_axes == 2), changed & (kept_axes == 1)), dim=-1))
+        mixed, sign_match, speed_match, guided, final, reduced_to_two, reduced_to_one = torch.cat(grouped).unbind(-1)
         report["courses"].append({"scale": scale, "samples": args.samples, "mixed_samples": int(mixed.sum()),
             "direction_coverage": float(sign_match.float().mean()),
             "mixed_direction_coverage": float(sign_match[mixed].float().mean()),
             "speed_and_direction_coverage": float(speed_match.float().mean()),
             "mixed_speed_and_direction_coverage": float(speed_match[mixed].float().mean()),
             "guided_speed_and_direction_coverage": float(guided.float().mean()),
-            "guided_mixed_speed_and_direction_coverage": float(guided[mixed].float().mean())})
+            "guided_mixed_speed_and_direction_coverage": float(guided[mixed].float().mean()),
+            "fallback_speed_and_direction_coverage": float(final.float().mean()),
+            "fallback_mixed_speed_and_direction_coverage": float(final[mixed].float().mean()),
+            "mixed_reduced_to_two": int(reduced_to_two.sum()),
+            "mixed_reduced_to_one": int(reduced_to_one.sum()),
+            "mixed_original_kept_without_reference": int((mixed & ~final).sum())})
     print(json.dumps(report, indent=2))
 
 

@@ -23,6 +23,7 @@ TOE_X = -.002
 SPEED_BAND_EDGES = (.33, .66)
 GUIDED_MIXED_FRACTION = .80
 GUIDED_JITTER = .035
+UNMATCHED_MIXED_FALLBACK_FRACTION = .80
 
 
 def command_signature(commands):
@@ -63,6 +64,29 @@ def guide_mixed_targets(commands, caps, clip_commands, clip_signatures, generato
     adjusted = (center[nearest] + GUIDED_JITTER*noise*active).clamp(-caps, caps)
     result = commands.clone()
     result[ids] = torch.where((same & eligible).any(dim=-1, keepdim=True), adjusted, target)
+    return result
+
+
+def fallback_mixed_targets(commands, clip_commands, clip_signatures, generator=None):
+    """Reduce some unsupported mixed targets to their strongest matching axes."""
+    mixed = command_signature(commands).count_nonzero(dim=-1) > 1
+    selected = mixed & (torch.rand(len(commands), device=commands.device, generator=generator)
+                        < UNMATCHED_MIXED_FALLBACK_FRACTION)
+    ids = torch.where(selected)[0]
+    allowed, _ = matched_references(commands[ids], clip_commands, clip_signatures)
+    ids = ids[~allowed.any(dim=-1)]
+    target = commands[ids]
+    # Targets are already normalized by each axis limit. Ties keep vx, vy, wz order.
+    order = target.abs().argsort(dim=-1, descending=True, stable=True)
+    weakest = order[:, 2:]
+    strongest = order[:, :1]
+    two_axes = target.scatter(1, weakest, 0.)
+    one_axis = torch.zeros_like(target).scatter(1, strongest, target.gather(1, strongest))
+    two_matches, _ = matched_references(two_axes, clip_commands, clip_signatures)
+    one_matches, _ = matched_references(one_axis, clip_commands, clip_signatures)
+    result = commands.clone()
+    result[ids] = torch.where(two_matches.any(dim=-1, keepdim=True), two_axes,
+                              torch.where(one_matches.any(dim=-1, keepdim=True), one_axis, target))
     return result
 
 
@@ -163,12 +187,14 @@ class DirectionalAMP(Stage1AMP):
         self.count = torch.zeros(env.num_envs, dtype=torch.long, device=self.device)
         self.cursor = -1
         self.metadata = {
-            **revision, "revision": "direction_speed_link_history_deadzone_v4",
+            **revision, "revision": "direction_speed_mixed_fallback_v5",
             "leg_order": list(LEG_ORDER), "frame_dt_s": env.step_dt,
             "history_lags": list(HISTORY_LAGS), "feature_size": FEATURES,
             "physical_command_deadzone": VELOCITY_DEADZONE, "speed_temperature": SPEED_TEMPERATURE,
             "max_normalized_speed_distance": MAX_SPEED_DISTANCE, "linear_velocity_frame": "root_link",
             "coverage_speed_band_edges": list(SPEED_BAND_EDGES), "guided_mixed_target_fraction": GUIDED_MIXED_FRACTION,
+            "unmatched_mixed_fallback_fraction": UNMATCHED_MIXED_FALLBACK_FRACTION,
+            "unmatched_mixed_fallback_axis_counts": [2, 1],
             "guided_jitter_normalized": GUIDED_JITTER, "clips": clips, "expert_transitions": len(self.expert_pairs),
             "recorded_clips": len(recorded), "reward_max_per_second": AMP_REWARD_PER_SECOND,
             "ramp_updates": AMP_RAMP_UPDATES, "uses_reference_state_resets": False,
