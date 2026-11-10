@@ -13,6 +13,7 @@ try:
  from scipy.spatial.transform import Rotation
  from isaaclab.utils.math import matrix_from_quat
  from duet_env import DuetEnv,DuetCfg
+ from base_commands import apply_velocity_deadzone
  from cooperative_ppo import make_ppo,observations
  from command_session import CommandSession
  from reference_filter import ReferenceFilter
@@ -102,7 +103,7 @@ try:
       except (ValueError,RuntimeError) as e:message='目标未接受：'+str(e)
    base=np.asarray(controls['base'],float)
    if base.shape!=(3,) or not np.isfinite(base).all():raise ValueError('Expected vx,vy,wz only')
-   env.command_targets[0,:3]=torch.tensor(np.clip(base,[-1,-.6,-.8],[1,.6,.8]),device=env.device,dtype=torch.float32)
+   env.command_targets[0,:3]=apply_velocity_deadzone(torch.tensor(np.clip(base,[-1,-.6,-.8],[1,.6,.8]),device=env.device,dtype=torch.float32))
    env.grip_target[:]=float(np.clip(controls['grip'],0,1));paused=controls.get('paused',False) or failed
    if not paused:
     tic=time.monotonic();actual=env.snapshot();nextref=env.session.sample(env.live_t+.02)

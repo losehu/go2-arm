@@ -33,10 +33,13 @@ def main():
             path = directory / name
             if hashlib.sha256(path.read_bytes()).hexdigest() != entry["sha256"]:
                 raise ValueError(f"Hash mismatch: {path}")
-            clips[name] = {**entry, "teacher_checkpoint_sha256": report["teacher_checkpoint_sha256"],
-                           "teacher_lift_assist_mm": report.get("teacher_lift_assist_mm", 0.),
-                           "teacher_assist_paired": report.get("teacher_assist_paired", False),
-                           "teacher_front_lift_scale": report.get("teacher_front_lift_scale", 1.)}
+            teacher = entry.get("teacher_checkpoint_sha256", report.get("teacher_checkpoint_sha256"))
+            if not isinstance(teacher, str) or len(teacher) != 64 or any(c not in "0123456789abcdef" for c in teacher):
+                raise ValueError(f"Missing or invalid teacher checkpoint hash: {name}")
+            clips[name] = {**entry, "teacher_checkpoint_sha256": teacher}
+            for attr, default in (("teacher_lift_assist_mm", 0.), ("teacher_assist_paired", False),
+                                  ("teacher_front_lift_scale", 1.)):
+                clips[name][attr] = entry.get(attr, report.get(attr, default))
             results[key] = result
             payloads[name] = path
     if not clips:

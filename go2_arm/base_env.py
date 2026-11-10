@@ -18,7 +18,10 @@ from isaaclab.utils.math import matrix_from_quat,quat_apply,quat_mul,subtract_fr
 from robot_constants import DEFAULT_Q,JOINT_NAMES,EFFORT_LIMITS
 from arm_fk import ArmFK
 from curriculum import STAGES,sample_commands,tracking_terms,motion_gate
+from base_commands import advance_base_command
 R=Path(__file__).resolve().parent
+LEG_ORDER=("FL","FR","RL","RR")
+SPLIT_FOOT_ASSET="robot_contact_split.usda"
 MOTOR_LIMITS={'[FR][LR]_(hip|thigh)_joint':23.7,'[FR][LR]_calf_joint':45.43,'joint[12]':20.,'joint3':15.,'joint4':7.,'joint[56]':5.,'finger_.*':10.}
 
 @configclass
@@ -30,7 +33,7 @@ class DualModeCfg(DirectRLEnvCfg):
     state_space=0
     sim=sim_utils.SimulationCfg(dt=.0025,render_interval=8,physx=sim_utils.PhysxCfg(enable_external_forces_every_iteration=True),
         physics_material=sim_utils.RigidBodyMaterialCfg(static_friction=1.,dynamic_friction=.8,restitution=0.))
-    scene=InteractiveSceneCfg(num_envs=4096,env_spacing=3.,replicate_physics=True)
+    scene=InteractiveSceneCfg(num_envs=4096,env_spacing=3.,replicate_physics=True,lazy_sensor_update=False)
     terrain=TerrainImporterCfg(prim_path='/World/ground',terrain_type='plane',collision_group=-1,
         physics_material=sim_utils.RigidBodyMaterialCfg(static_friction=1.,dynamic_friction=.8,restitution=0.))
     robot=ArticulationCfg(prim_path='/World/envs/env_.*/Robot',
@@ -41,7 +44,7 @@ class DualModeCfg(DirectRLEnvCfg):
         actuators={'motors':IdealPDActuatorCfg(joint_names_expr=['.*'],stiffness=0.,damping=0.,armature={'[FR][LR]_(hip|thigh|calf)_joint':.01,'joint[1-6]':.01,'finger_.*':.001},
             friction=.2,dynamic_friction=.2,viscous_friction={'[FR][LR]_(hip|thigh|calf)_joint':.1,'joint[1-6]':1.,'finger_.*':1.},
             effort_limit=MOTOR_LIMITS,effort_limit_sim=MOTOR_LIMITS,velocity_limit_sim={'[FR][LR]_(hip|thigh|calf)_joint':30.,'joint[1-6]':3.,'finger_.*':.2})})
-    contact=ContactSensorCfg(prim_path='/World/envs/env_.*/Robot/.*',history_length=3,update_period=.0025,track_air_time=True)
+    contact=ContactSensorCfg(prim_path='/World/envs/env_.*/Robot/.*',history_length=8,update_period=.0025,track_air_time=True)
 
 
 class DualModeEnv(DirectRLEnv):
@@ -55,6 +58,11 @@ class DualModeEnv(DirectRLEnv):
         if self.device=='cpu':self.scene.filter_collisions(global_prim_paths=['/World/ground'])
 
     def __init__(self,cfg,**kwargs):
+        asset=Path(cfg.robot.spawn.usd_path).with_name(SPLIT_FOOT_ASSET)
+        if not asset.is_file():
+            raise FileNotFoundError(f"Missing {asset}; run tools/split_foot_collisions.py")
+        cfg.robot.spawn.usd_path=str(asset)
+        cfg.contact.history_length=max(cfg.contact.history_length,cfg.decimation)
         super().__init__(cfg,**kwargs)
         dev=self.device;n=self.num_envs
         self.ids=torch.tensor([self.robot.joint_names.index(x) for x in JOINT_NAMES],device=dev)
@@ -88,12 +96,18 @@ class DualModeEnv(DirectRLEnv):
         self.goal=torch.zeros(n,6,device=dev);self.ref=torch.zeros(n,6,device=dev);self.ref_v=torch.zeros_like(self.ref);self.ref_a=torch.zeros_like(self.ref)
         self.actions=torch.zeros(n,19,device=dev);self.last_actions=torch.zeros_like(self.actions);self.filtered=torch.zeros_like(self.actions)
         self.commands=torch.zeros(n,4,device=dev);self.command_targets=torch.zeros_like(self.commands)
+        self.base_slew=torch.zeros(n,3,device=dev)
         self.command_age=torch.zeros(n,device=dev)
         self.command_period=torch.full((n,),5.,device=dev)
         self.grip=torch.full((n,1),.5,device=dev);self.grip_target=self.grip.clone()
         self.mode=torch.zeros(n,1,device=dev);self.obs_history=torch.zeros(n,3,100,device=dev)
-        self.forbidden=[i for i,x in enumerate(self.contact.body_names) if not x.endswith('_calf')]
-        self.feet=[self.contact.body_names.index(f'{x}_calf') for x in ['FL','FR','RL','RR']]
+        foot_names=[f'{leg}_foot_contact' for leg in LEG_ORDER]
+        self.feet=[self.contact.body_names.index(name) for name in foot_names]
+        self.foot_bodies=[self.robot.body_names.index(name) for name in foot_names]
+        self.calf_sensors=[self.contact.body_names.index(f'{leg}_calf') for leg in LEG_ORDER]
+        self.forbidden=[i for i,name in enumerate(self.contact.body_names) if name not in foot_names]
+        self.calf_contact=torch.zeros(n,4,dtype=torch.bool,device=dev)
+        self.calf_contact_seen=torch.zeros(n,dtype=torch.bool,device=dev)
         self.link6=self.robot.body_names.index('link6');self.tcp_offset=torch.tensor([0,0,.13],device=dev).expand(n,3)
         self.tcp_rot=torch.tensor([2**-.5,0,-2**-.5,0],device=dev).expand(n,4)
         self.head_vertices=torch.tensor(np.load(R/'head_vertices.npy'),device=dev,dtype=torch.float32)
@@ -139,8 +153,8 @@ class DualModeEnv(DirectRLEnv):
         self.command_age+=self.step_dt
         change=torch.where(self.command_age>self.command_period)[0]
         if len(change):self._sample_base_commands(change)
-        slew=torch.tensor([1.,1.,1.,.3],device=self.device)*self.step_dt
-        self.commands+=torch.clamp(self.command_targets-self.commands,-slew,slew)
+        self._advance_base_command()
+        self.commands[:,3]+=(self.command_targets[:,3]-self.commands[:,3]).clamp(-.3*self.step_dt,.3*self.step_dt)
         self.grip+=(self.grip_target-self.grip).clamp(-.01,.01)
         # A mode-only event never changes the planned reference.
         flip=torch.rand(self.num_envs,1,device=self.device)<.005
@@ -155,6 +169,10 @@ class DualModeEnv(DirectRLEnv):
             self.goal[outward]=self.bank[self.path[outward],0]
             if len(returned):self._choose_path(returned)
         self.control_steps+=1
+
+    def _advance_base_command(self):
+        self.base_slew[:],self.commands[:,:3]=advance_base_command(
+            self.base_slew,self.command_targets[:,:3],self.step_dt)
 
     def _apply_action(self):
         self._reference();q=self.robot.data.joint_pos;v=self.robot.data.joint_vel
@@ -174,6 +192,13 @@ class DualModeEnv(DirectRLEnv):
         effort[:,self.ids]=self.last_tau;self.robot.set_joint_effort_target(effort)
         self.clock+=self.physics_dt
 
+    def foot_kinematics(self):
+        data=self.robot.data
+        return data.body_link_pos_w[:,self.foot_bodies],data.body_link_lin_vel_w[:,self.foot_bodies]
+
+    def foot_contact_forces(self):
+        return self.contact.data.net_forces_w[:,self.feet].norm(dim=-1)
+
     def _metrics(self):
         q=self.robot.data.root_quat_w;Rmat=matrix_from_quat(q)
         pitch=torch.asin((-Rmat[:,2,0]).clamp(-1,1))
@@ -190,6 +215,8 @@ class DualModeEnv(DirectRLEnv):
         relative=target_R.transpose(1,2)@actual_R
         self.tcp_rot_error=torch.acos(((relative.diagonal(dim1=1,dim2=2).sum(-1)-1)/2).clamp(-1,1))
         forces=self.contact.data.net_forces_w_history.norm(dim=-1).max(dim=1).values
+        self.calf_contact=forces[:,self.calf_sensors]>.5
+        self.calf_contact_seen|=self.calf_contact.any(dim=-1)
         self.bad_contact=(forces[:,self.forbidden]>.5).any(-1)
         head=self.robot.data.root_pos_w[:,2]+(Rmat[:,2]@self.head_vertices.T).min(-1).values
         return err_v,err_w,err_p,arm_e,head,forces
@@ -287,7 +314,7 @@ class DualModeEnv(DirectRLEnv):
         self._choose_path(env_ids);self.ref[env_ids]=self.bank[self.path[env_ids],0];self.ref_v[env_ids]=0;self.ref_a[env_ids]=0
         self.actions[env_ids]=0;self.last_actions[env_ids]=0;self.filtered[env_ids]=0;self.obs_history[env_ids]=0
         self._sample_base_commands(env_ids)
-        self.commands[env_ids]=0;self.grip[env_ids]=.5;self.grip_target[env_ids]=torch.rand(len(env_ids),1,device=self.device)
+        self.commands[env_ids]=0;self.base_slew[env_ids]=0;self.calf_contact_seen[env_ids]=False;self.grip[env_ids]=.5;self.grip_target[env_ids]=torch.rand(len(env_ids),1,device=self.device)
         self.mode[env_ids]=torch.randint(0,2,(len(env_ids),1),device=self.device).float();self.sums[env_ids]=0;self.steps[env_ids]=0
         self.exceed[env_ids]=0;self.last_goal_sign[env_ids]=0;self.goal_crossings[env_ids]=0;self.oscillation_seen[env_ids]=False;self.overshoot_seen[env_ids]=False
         self.track_sums[env_ids]=0;self.track_counts[env_ids]=0;self.gain_sums[env_ids]=0;self.active_counts[env_ids]=0

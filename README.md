@@ -2,7 +2,7 @@
 
 Unitree Go2 搭载前移 Piper 机械臂、开口盒和双 D435i 的自由底盘仿真。代码包含 Isaac Lab 训练、加载检查点后的 PhysX 推理，以及带右侧指令面板的 Tk/MuJoCo 可视化。
 
-当前配方是第一阶段无相位 AMP v3。PPO 优化速度跟踪、姿态稳定、触地防滑、髋部外摆约束和 AMP 风格奖励。底盘策略观测为 69 维。新配方按指令方向筛选参考动作，再按速度加权采样。匹配的归一化速度距离上限为 0.30。80% 的组合目标优先匹配同方向的已验证速度，另保留原随机组合。判别器使用跨 0.20 秒的三个状态，比较关节运动、根链接原点速度、机身高度、相对地面脚高和脚速。只有有参考覆盖且指令稳定的历史窗口参与 AMP。触地时根据实际腾空和抬脚幅度给有上限的奖励。机身低于 28.5 cm 时施加单边软惩罚。阶段一保持折叠臂姿态 `[0, 40, -3, 0, -32, 0]°`。阶段一达到全速度范围、15° 内部姿态指令范围且成功率 EMA ≥ 0.7 后，完整训练才进入底盘与机械臂联合优化。
+当前配方是第一阶段无相位 AMP v4。PPO 优化速度跟踪、姿态稳定、触地防滑、髋部外摆约束和 AMP 风格奖励。底盘策略观测为 69 维。新配方按指令方向筛选参考动作，再按速度加权采样。匹配的归一化速度距离上限为 0.30。80% 的组合目标优先匹配同方向的已验证速度，另保留原随机组合。判别器使用跨 0.20 秒的三个状态，比较关节运动、根链接原点速度、机身高度、相对地面脚高和脚速。只有有参考覆盖且指令稳定的历史窗口参与 AMP。触地时根据实际腾空和抬脚幅度给有上限的奖励。PhysX 中足底球和小腿各有独立的接触信号，小腿碰撞会终止回合。机身低于 28.5 cm 时施加单边软惩罚。阶段一保持折叠臂姿态 `[0, 40, -3, 0, -32, 0]°`。阶段一达到全速度范围、15° 内部姿态指令范围且成功率 EMA ≥ 0.7 后，完整训练才进入底盘与机械臂联合优化。
 
 ## 环境
 
@@ -20,6 +20,7 @@ python -m pip install -r requirements.txt
 
 ```bash
 python tools/prepare_assets.py --bundle /path/to/go2_piper_roboduet_amp
+python tools/split_foot_collisions.py --usd go2_arm/robot/usd/robot.usd --headless --device cpu
 ```
 
 当前服务器配方使用 40 条自由底盘 PhysX 补录和 17 条上游参考，覆盖全部 27 种方向符号组合。用冻结的旧策略录制，右侧以镜像策略在物理仿真中独立重跑。部分补录用实际离地触发的教师抬脚辅助。筛选要求每只脚至少 3 次完整摆动、摆动峰值中位数至少 1.5 cm，且速度跟踪、对角支撑和防滑通过。最慢通过筛选的补录速度为 ±0.16 m/s，可用于匹配 ±0.12 m/s 指令。补录记录包含教师、参数和文件哈希。数据在本地准备，训练可读取原模型包中的补录目录，或通过 `--recordings` 导入：
@@ -33,6 +34,12 @@ python tools/record_amp_clips.py --package go2_arm --headless --device cpu \
 python tools/merge_amp_recordings.py --output runs/recorded_merged runs/recorded runs/recorded_slow
 python tools/prepare_assets.py --bundle /path/to/go2_piper_roboduet_amp --recordings runs/recorded_merged
 python tools/audit_amp_coverage.py
+```
+
+生成的 USD 层将原足底球移到独立刚体，小腿与足底合计的质量、质心和惯量保持一致。URDF 和 MuJoCo 视图资产仍来自原模型包。运行以下命令可分别验证脚底触地、小腿触地和同时触地。
+
+```bash
+python tools/verify_foot_contacts.py --package go2_arm --headless --device cpu
 ```
 
 模型包包含有独立使用条款的相机支架。模型网格、生成的 USD、轨迹库、参考动作和训练权重由使用者在本地准备。具体版本与散列见 [asset_manifest.json](asset_manifest.json)，资产来源见 [THIRD_PARTY.md](THIRD_PARTY.md)。
@@ -60,7 +67,7 @@ python go2_arm/training_status.py runs/amp_phase_free
 
 ## 本地交互推理
 
-用同一模型包生成的双策略 `.pt` 文件启动窗口。右侧 `vx / vy / wz` 滑块控制底盘，单位分别为 m/s、m/s、rad/s。启动时暂停，点「继续仿真」后调整速度。阶段一检查点用于行走，机械臂控制需要第二阶段检查点。
+用同一模型包生成的双策略 `.pt` 文件启动窗口。右侧 `vx / vy / wz` 滑块控制底盘，单位分别为 m/s、m/s、rad/s。三个分量分别在绝对值不超过 0.10 时清零。训练、推理和 AMP 方向分类使用同一死区。AMP 检查 0.20 秒窗口的每帧，跨方向类别或速度变化过大的窗口不参与风格匹配。启动时暂停，点「继续仿真」后调整速度。阶段一检查点用于行走，机械臂控制需要第二阶段检查点。
 
 ```bash
 python go2_arm/launch_live_preview.py --checkpoint /path/to/model_4000.pt

@@ -8,13 +8,14 @@ import numpy as np
 import torch
 from torch import nn
 
+from base_commands import VELOCITY_DEADZONE
+
 from stage1_amp import (AMP_RAMP_UPDATES, AMP_REWARD_PER_SECOND, COMMAND_SCALE,
                         LEG_ORDER, Stage1AMP, foot_positions, motion_features)
 
 FEATURES = 59
 HISTORY_LAGS = (10, 5, 0)
 HISTORY_FRAMES = max(HISTORY_LAGS) + 1
-DIRECTION_DEADBAND = .08  # In normalized command coordinates.
 SPEED_TEMPERATURE = .025
 HISTORY_COMMAND_TOLERANCE = .10
 MAX_SPEED_DISTANCE = .30
@@ -25,7 +26,8 @@ GUIDED_JITTER = .035
 
 
 def command_signature(commands):
-    return torch.where(commands.abs() >= DIRECTION_DEADBAND, commands.sign(), 0.)
+    thresholds = VELOCITY_DEADZONE / commands.new_tensor(COMMAND_SCALE)
+    return torch.where(commands.abs() > thresholds, commands.sign(), 0.)
 
 
 def matched_references(commands, clip_commands, clip_signatures):
@@ -50,7 +52,7 @@ def guide_mixed_targets(commands, caps, clip_commands, clip_signatures, generato
     ids = torch.where(selected)[0]
     target = commands[ids]
     center = (clip_signatures * (clip_signatures*clip_commands).clamp_min(
-        DIRECTION_DEADBAND + GUIDED_JITTER)).clamp(-caps, caps)
+        VELOCITY_DEADZONE / commands.new_tensor(COMMAND_SCALE) + GUIDED_JITTER + .0001)).clamp(-caps, caps)
     # Reserve room for jitter before deciding whether a center is admissible.
     eligible = ((center-clip_commands).norm(dim=-1) <= MAX_SPEED_DISTANCE - math.sqrt(3)*GUIDED_JITTER)
     same = (signatures[ids, None] == clip_signatures).all(dim=-1)
@@ -161,10 +163,10 @@ class DirectionalAMP(Stage1AMP):
         self.count = torch.zeros(env.num_envs, dtype=torch.long, device=self.device)
         self.cursor = -1
         self.metadata = {
-            **revision, "revision": "direction_and_speed_matched_link_history_v3",
+            **revision, "revision": "direction_speed_link_history_deadzone_v4",
             "leg_order": list(LEG_ORDER), "frame_dt_s": env.step_dt,
             "history_lags": list(HISTORY_LAGS), "feature_size": FEATURES,
-            "direction_deadband": DIRECTION_DEADBAND, "speed_temperature": SPEED_TEMPERATURE,
+            "physical_command_deadzone": VELOCITY_DEADZONE, "speed_temperature": SPEED_TEMPERATURE,
             "max_normalized_speed_distance": MAX_SPEED_DISTANCE, "linear_velocity_frame": "root_link",
             "coverage_speed_band_edges": list(SPEED_BAND_EDGES), "guided_mixed_target_fraction": GUIDED_MIXED_FRACTION,
             "guided_jitter_normalized": GUIDED_JITTER, "clips": clips, "expert_transitions": len(self.expert_pairs),
@@ -190,10 +192,12 @@ class DirectionalAMP(Stage1AMP):
         self.commands[:, self.cursor] = command
         self.count.copy_(torch.where(done, 0, (self.count + 1).clamp_max(HISTORY_FRAMES)))
         indices = [(self.cursor-lag) % HISTORY_FRAMES for lag in HISTORY_LAGS]
-        stable = (self.commands[:, indices] - command[:, None]).abs().amax(dim=(1, 2)) <= HISTORY_COMMAND_TOLERANCE
+        signature = command_signature(command)
+        direction_stable = (command_signature(self.commands) == signature[:, None]).all(dim=(1, 2))
+        speed_stable = (self.commands - command[:, None]).abs().amax(dim=(1, 2)) <= HISTORY_COMMAND_TOLERANCE
         allowed, _ = matched_references(command, self.clip_commands, self.clip_signatures)
         supported = allowed.any(dim=-1)
-        valid = (self.count == HISTORY_FRAMES) & stable & supported
+        valid = (self.count == HISTORY_FRAMES) & direction_stable & speed_stable & supported
         return torch.cat((self.history[:, indices].flatten(1), command), dim=-1), valid
 
     def coverage(self, rollout, valid):
@@ -214,13 +218,8 @@ class DirectionalAMP(Stage1AMP):
     @staticmethod
     def verify_foot_kinematics(env):
         from isaaclab.utils.math import quat_apply_inverse
-        from foot_gait import foot_centers
-
         data = env.robot.data
-        ids = [env.robot.body_names.index(f"{leg}_calf") for leg in LEG_ORDER]
-        world_pos, world_speed = foot_centers(data.body_link_pos_w[:, ids], data.body_link_quat_w[:, ids],
-                                              data.body_com_pos_w[:, ids], data.body_com_lin_vel_w[:, ids],
-                                              data.body_com_ang_vel_w[:, ids])
+        world_pos, world_speed = env.foot_kinematics()
         root_q = data.root_link_quat_w[:, None].expand(-1, 4, -1)
         actual_pos = quat_apply_inverse(root_q, world_pos - data.root_link_pos_w[:, None])
         actual_speed = quat_apply_inverse(root_q, world_speed)

@@ -26,7 +26,6 @@ import numpy as np
 import torch
 from cooperative_ppo import make_ppo, observations
 from duet_env import DuetCfg, DuetEnv
-from foot_gait import foot_centers
 from gait_metrics import measured_swing
 
 
@@ -117,7 +116,6 @@ def main():
     loco.load(saved["loco"], load_cfg=None, strict=True)
     loco.actor.eval()
     data = env.robot.data
-    feet = [env.robot.body_names.index(f"{leg}_calf") for leg in ("FL", "FR", "RL", "RR")]
     env.failed = torch.zeros(n, dtype=torch.bool, device=env.device)
     env.recording = True
     frames, clearance_samples, contacts, slip_samples = [], [], [], []
@@ -137,7 +135,7 @@ def main():
             actions = loco.actor(observations(obs))
             actions[mirror] = mirrored_legs(actions[mirror])
             if args.lift_assist_mm:
-                force_now = env.contact.data.net_forces_w[:, env.feet].norm(dim=-1)
+                force_now = env.foot_contact_forces()
                 grounded = force_now > 1.
                 time_airborne = torch.where(grounded, 0., time_airborne + env.step_dt)
                 signal = time_airborne
@@ -156,11 +154,9 @@ def main():
             env.step(torch.cat((actions, zero[:, :7]), dim=-1))
             if step < 100:
                 continue
-            pos, vel = foot_centers(data.body_link_pos_w[:, feet], data.body_link_quat_w[:, feet],
-                                    data.body_com_pos_w[:, feet], data.body_com_lin_vel_w[:, feet],
-                                    data.body_com_ang_vel_w[:, feet])
+            pos, vel = env.foot_kinematics()
             clear = pos[:, :, 2] - env.scene.env_origins[:, None, 2] - .022
-            force = env.contact.data.net_forces_w[:, env.feet].norm(dim=-1)
+            force = env.foot_contact_forces()
             contact = (force > 1.) & (clear < .02)
             root_pos = data.root_link_pos_w - env.scene.env_origins
             quat_xyzw = data.root_link_quat_w[:, [1, 2, 3, 0]]
@@ -214,7 +210,8 @@ def main():
             clips.append({"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
                           "command": results[p]["command"]})
     report = {"source": "fixed_command_free_base_physx_policy_recording",
-              "linear_velocity_frame": "root_link", "swing_quality_revision": "measured_swing_v1",
+              "linear_velocity_frame": "root_link", "contact_revision": "split_foot_calf_rigid_bodies_v1",
+              "swing_quality_revision": "measured_swing_v1",
               "teacher_checkpoint_sha256": sha, "teacher_lift_assist_mm": args.lift_assist_mm, "teacher_assist_paired": args.assist_paired, "teacher_front_lift_scale": args.front_lift_scale, "seed": 61221, "clips": clips, "results": results}
     (args.output / "recording_manifest.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"clips": len(clips), "cases": len(results)}), flush=True)

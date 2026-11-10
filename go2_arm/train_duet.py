@@ -27,6 +27,8 @@ try:
  from duet_env import DuetEnv,DuetCfg
  from cooperative_ppo import make_ppo,observations,finite_models
  from robot_constants import DEFAULT_Q
+ from base_commands import VELOCITY_DEADZONE
+ from base_env import SPLIT_FOOT_ASSET
  from torch.utils.tensorboard import SummaryWriter
  torch.set_num_threads(4);torch.manual_seed(61108)
  cfg=DuetCfg();cfg.scene.num_envs=args.num_envs;cfg.seed=61108;cfg.sim.device=args.device
@@ -74,7 +76,8 @@ try:
  manifest.update(controller_revision='arm5_bandwidth_v7',arm_controller_omega_rad_s=env.omega.detach().cpu().tolist(),arm_controller_damping_ratio=env.zeta)
  manifest.update(episode_success_revision='timeout_without_physical_termination_v8')
  manifest.update(foot_sphere_radius_m=.022,foot_slip_metric_threshold_mps=.1)
- manifest['asset_hashes']={str(f.relative_to(R)):hashlib.sha256(f.read_bytes()).hexdigest() for f in [R/'robot/robot.urdf',R/'robot/robot_mjcf.xml',R/'robot/scene.xml',*sorted((R/'robot/usd').rglob('*.usd'))]}
+ manifest['asset_hashes']={str(f.relative_to(R)):hashlib.sha256(f.read_bytes()).hexdigest() for f in [R/'robot/robot.urdf',R/'robot/robot_mjcf.xml',R/'robot/scene.xml',R/'robot/usd'/SPLIT_FOOT_ASSET,*sorted((R/'robot/usd').rglob('*.usd'))]}
+ manifest.update(contact_revision='split_foot_calf_rigid_bodies_v1',base_command_deadzone=VELOCITY_DEADZONE)
  manifest.update(stage1_arm_hold_cost_weight=4.,stage1_arm_hold_cost_revision='mean_joint_error_log_tail_v1')
  manifest.update(robot_revision='box_mount_rails_v9',box_payload_mass_kg=.5,box_mount_rails_mass_kg=.08,box_mount_xyz_m=[-.1,0,.115])
  if args.phase_free_amp:
@@ -87,7 +90,7 @@ try:
    from air_time import AIR_TIME_REWARD
    from base_height_objective import BASE_HEIGHT_SPEC
    manifest.update(directional_amp=True,air_time_reward=AIR_TIME_REWARD,base_height_penalty=BASE_HEIGHT_SPEC,
-    gait_reward_revision='amp_direction_speed_matched_contact_slip_air_time_v3',lateral_command_min_mps=.12)
+    gait_reward_revision='amp_split_foot_deadzone_v4',lateral_command_min_mps=.12)
  else:
   manifest.update(gait_reward_revision='diagonal_trot_footcenter_clearance_placement_v9',foot_swing_peak_clearance_m=.04,gait_name='diagonal_trot',gait_leg_order=['FL','FR','RL','RR'],gait_phase_offsets=[0.,.5,.5,0.],gait_frequency_hz=3.,gait_reward_weight=6.,gait_clearance_cost_weight=4.,gait_placement_cost_weight=25.,gait_standing_mode='four_feet_support')
   if args.coordinated_trot:

@@ -9,12 +9,13 @@ from isaaclab.utils import configclass
 from isaaclab.envs import DirectRLEnv
 from isaaclab.utils.math import matrix_from_quat
 from base_env import DualModeEnv,DualModeCfg,R
+from base_commands import apply_velocity_deadzone
 from curriculum import tracking_terms,motion_gate
 from stage1_schedule import STAGE1_LEVELS
 from reference_filter import ReferenceFilter
 from posture_objective import posture_objective
 from tracking_objective import tracking_error_objective
-from foot_gait import coordinated_trot_terms, foot_centers, gait_terms, planted_foot_cost, trot_frequency, trot_placement_time
+from foot_gait import coordinated_trot_terms, gait_terms, planted_foot_cost, trot_frequency, trot_placement_time
 from hip_splay import hip_splay
 from air_time import AirTimeReward
 from base_height_objective import BASE_HEIGHT_SPEC,low_base_cost
@@ -100,6 +101,7 @@ class DuetEnv(DualModeEnv):
             mixed=torch.rand(len(ids),device=self.device)<.25
             c[mixed]+=(2*torch.rand(int(mixed.sum()),3,device=self.device)-1)*caps*.25
             c=c.clamp(-caps,caps);c[torch.rand(len(ids),device=self.device)<.1]=0
+            c=apply_velocity_deadzone(c)
             if self.cfg.directional_amp and hasattr(self,'amp_command_bank'):
                 scale, reference, signatures=self.amp_command_bank
                 c=scale*guide_mixed_targets(c/scale,caps/scale,reference,signatures)
@@ -149,7 +151,7 @@ class DuetEnv(DualModeEnv):
         self.command_age+=self.step_dt
         ids=torch.where(self.command_age>self.command_period)[0]
         if len(ids):self._sample_base_commands(ids)
-        self.commands[:,:3]+=(self.command_targets[:,:3]-self.commands[:,:3]).clamp(-self.step_dt,self.step_dt)
+        self._advance_base_command()
         self.commands[:,3]=self.guidance[:,0]
         self.grip+=(self.grip_target-self.grip).clamp(-.01,.01)
         self.walk_blend+=(self.commands[:,:3].norm(dim=-1).gt(.04).float()-self.walk_blend).clamp(-.04,.04)
@@ -226,24 +228,23 @@ class DuetEnv(DualModeEnv):
         norm,progress,stalled,active=tracking_terms(actual,self.commands[:,:3])
         tracking=tracking_error_objective(norm)+1.5*progress-2*stalled.float()
         posture=posture_objective(ep,self.roll_error)
-        body_ids=[self.robot.body_names.index(n) for n in ['FL_calf','FR_calf','RL_calf','RR_calf']]
-        foot_position,foot_velocity=foot_centers(self.robot.data.body_link_pos_w[:,body_ids],self.robot.data.body_link_quat_w[:,body_ids],
-            self.robot.data.body_com_pos_w[:,body_ids],self.robot.data.body_com_lin_vel_w[:,body_ids],self.robot.data.body_com_ang_vel_w[:,body_ids])
+        foot_position,foot_velocity=self.foot_kinematics()
+        foot_force=self.foot_contact_forces()
         foot_clearance=foot_position[:,:,2]-self.scene.env_origins[:,None,2]-.022
-        walking=self.walk_blend>.8
+        walking=(self.walk_blend>.8)&~self.bad_contact
         if self.cfg.phase_free_amp:
-            foot_contact, _, slip_cost=planted_foot_cost(force[:,self.feet],foot_clearance,foot_velocity)
+            foot_contact, _, slip_cost=planted_foot_cost(foot_force,foot_clearance,foot_velocity)
             gait_reward=-slip_cost
             mid_swing=torch.zeros_like(foot_contact)
             diagonal_match=torch.zeros_like(walking)
         else:
             if self.cfg.coordinated_trot:
                 gait,gait_cost,clearance_target,swing_phase,foot_contact=coordinated_trot_terms(
-                    self.phase,self.walk_blend,force[:,self.feet],foot_clearance,foot_velocity)
+                    self.phase,self.walk_blend,foot_force,foot_clearance,foot_velocity)
             else:
-                gait,clearance_cost,clearance_target,swing_phase=gait_terms(self.phase,self.walk_blend,force[:,self.feet],foot_clearance,foot_velocity)
+                gait,clearance_cost,clearance_target,swing_phase=gait_terms(self.phase,self.walk_blend,foot_force,foot_clearance,foot_velocity)
                 gait_cost=4.*clearance_cost
-                foot_contact=force[:,self.feet]>1.
+                foot_contact=foot_force>1.
             mid_swing=clearance_target>=.02
             expected_contact=~swing_phase.bool()
             diagonal_match=(foot_contact==expected_contact).all(-1)&walking
@@ -298,7 +299,7 @@ class DuetEnv(DualModeEnv):
             self.hip_splay_stats+=torch.cat([hip_deg,hip_excess.float(),splay_cost[:,None]],dim=-1)
         self.loco_reward=(tracking+posture+gait_reward-arm_hold_cost-splay_cost+regular+collision+.2+(.2*task if self.training_stage==2 else 0))*self.step_dt
         if self.cfg.directional_amp:
-            move=self.commands[:,:2].norm(dim=-1)>.06
+            move=(self.commands[:,:2].norm(dim=-1)>.06)&~self.bad_contact
             bonus=self.air_time_reward.step(foot_contact,foot_clearance,move,self.step_dt)
             height=self.robot.data.root_link_pos_w[:,2]-self.scene.env_origins[:,2]
             height_cost=low_base_cost(height)
@@ -331,6 +332,7 @@ class DuetEnv(DualModeEnv):
             self.precision_success_ema=decay*self.precision_success_ema+(1-decay)*precision.float().mean().item()
             self.log_metrics={'vx_rmse':float(rmse[:,0].mean()),'vy_rmse':float(rmse[:,1].mean()),'wz_rmse':float(rmse[:,2].mean()),'pitch_rmse_deg':float(rmse[:,3].mean()*180/np.pi),'roll_rmse_deg':float(roll.mean()*180/np.pi),'tcp_rmse_m':float(rmse[:,12].mean()),'episode_steps':float(count.mean()),'response_pass_fraction':float(response.float().mean()),'contact_fraction':float((self.sums[ids,10]>0).float().mean()),'directional_gain':float(gain[self.active_counts[ids]>=50].mean()) if (self.active_counts[ids]>=50).any() else 0.}
             self.log_metrics.update(gate_complete_fraction=float(complete.float().mean()),gate_contact_free_fraction=float((self.sums[ids,10:12]==0).all(-1).float().mean()),gate_posture_pass_fraction=float(((rmse[:,3]<np.deg2rad(3))&(roll<np.deg2rad(3))).float().mean()),gate_pass_fraction=float(passed.float().mean()))
+            self.log_metrics['calf_contact_episode_fraction']=float(self.calf_contact_seen[ids].float().mean())
             self.log_metrics.update(physical_termination_fraction=float(self.reset_terminated[ids].float().mean()),timeout_fraction=float(self.reset_time_outs[ids].float().mean()))
             foot=self.foot_stats[ids].sum(0)
             self.log_metrics.update(foot_contact_sliding_fraction=float(foot[4]/foot[3].clamp_min(1)),
@@ -369,11 +371,12 @@ class DuetEnv(DualModeEnv):
                 self.air_time_reward.reset(ids)
             self.extras['log']=self.log_metrics
         self.robot.reset(ids);DirectRLEnv._reset_idx(self,ids)
+        self.calf_contact_seen[ids]=False
         root=self.robot.data.default_root_state[ids].clone();root[:,:3]+=self.scene.env_origins[ids]
         self.robot.write_root_pose_to_sim(root[:,:7],ids);self.robot.write_root_velocity_to_sim(root[:,7:],ids)
         self.robot.write_joint_state_to_sim(self.nominal[ids],torch.zeros_like(self.nominal[ids]),env_ids=ids)
         self._choose_path(ids);self._sample_base_commands(ids)
-        for b in [self.actions,self.last_actions,self.filtered,self.commands,self.obs_history,self.sums,self.steps,self.exceed,self.track_sums,self.track_counts,self.gain_sums,self.active_counts,self.last_goal_sign,self.goal_crossings]:b[ids]=0
+        for b in [self.actions,self.last_actions,self.filtered,self.commands,self.base_slew,self.obs_history,self.sums,self.steps,self.exceed,self.track_sums,self.track_counts,self.gain_sums,self.active_counts,self.last_goal_sign,self.goal_crossings]:b[ids]=0
         # Articulation.reset() clears actuator internals but leaves the effort target buffer.
         self.last_tau[ids]=0
         self.robot.set_joint_effort_target(self.last_tau[ids],env_ids=ids)

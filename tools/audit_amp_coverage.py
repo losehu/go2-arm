@@ -12,6 +12,7 @@ parser.add_argument("--package", type=Path, default=Path(__file__).resolve().par
 parser.add_argument("--samples", type=int, default=200_000)
 args = parser.parse_args()
 sys.path.insert(0, str(args.package.resolve()))
+from base_commands import apply_velocity_deadzone
 from directional_amp import DirectionalAMP, command_signature, guide_mixed_targets, matched_references
 
 
@@ -26,7 +27,7 @@ def targets(n, cap, rng):
     command[mixed] += (2*torch.rand((int(mixed.sum()), 3), generator=rng)-1)*cap*.25
     command = command.clamp(-cap, cap)
     command[torch.rand(n, generator=rng) < .10] = 0.
-    return command
+    return apply_velocity_deadzone(command)
 
 
 def main():
