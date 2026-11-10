@@ -2,7 +2,7 @@
 
 Unitree Go2 搭载前移 Piper 机械臂、开口盒和双 D435i 的自由底盘仿真。代码包含 Isaac Lab 训练、加载检查点后的 PhysX 推理，以及带右侧指令面板的 Tk/MuJoCo 可视化。
 
-当前配方是第一阶段无相位 AMP。PPO 优化速度跟踪、姿态稳定、触地防滑、髋部外摆约束和 AMP 风格奖励。底盘策略观测为 69 维，风格判别器比较参考动作和仿真动作的相邻状态。阶段一保持折叠臂姿态 `[0, 40, -3, 0, -32, 0]°`。阶段一达到全速度范围、15° 内部姿态指令范围且成功率 EMA ≥ 0.7 后，完整训练才进入底盘与机械臂联合优化。
+当前配方是第一阶段无相位 AMP。PPO 优化速度跟踪、姿态稳定、触地防滑、髋部外摆约束和 AMP 风格奖励。底盘策略观测为 69 维。新配方按指令方向筛选参考动作，再按速度加权采样。判别器使用跨 0.20 秒的三个状态，比较关节运动、实测机身速度、机身高度、相对地面脚高和脚速。只有有参考覆盖且指令稳定的历史窗口参与 AMP。触地时根据实际腾空和抬脚幅度给有上限的奖励。阶段一保持折叠臂姿态 `[0, 40, -3, 0, -32, 0]°`。阶段一达到全速度范围、15° 内部姿态指令范围且成功率 EMA ≥ 0.7 后，完整训练才进入底盘与机械臂联合优化。
 
 ## 环境
 
@@ -22,6 +22,14 @@ python -m pip install -r requirements.txt
 python tools/prepare_assets.py --bundle /path/to/go2_piper_roboduet_amp
 ```
 
+当前服务器配方还使用 12 条自由底盘 PhysX 补录，覆盖慢速左右横移、前后斜移和带转向的组合。用冻结的旧策略录制，右侧以镜像策略在物理仿真中独立重跑。只收录两侧都通过速度跟踪、离地、对角支撑和防滑筛选的配对。补录与原 17 条一起使用。数据在本地准备，训练可读取原模型包中的补录目录，或通过 `--recordings` 导入：
+
+```bash
+python tools/record_amp_clips.py --package go2_arm --headless --device cpu \
+  --checkpoint /path/to/phase_free_teacher.pt --output runs/recorded
+python tools/prepare_assets.py --bundle /path/to/go2_piper_roboduet_amp --recordings runs/recorded
+```
+
 模型包包含有独立使用条款的相机支架。模型网格、生成的 USD、轨迹库、参考动作和训练权重由使用者在本地准备。具体版本与散列见 [asset_manifest.json](asset_manifest.json)，资产来源见 [THIRD_PARTY.md](THIRD_PARTY.md)。
 
 ## 从零训练
@@ -30,7 +38,7 @@ python tools/prepare_assets.py --bundle /path/to/go2_piper_roboduet_amp
 
 ```bash
 python go2_arm/train_duet.py --headless --device cpu --num_envs 8 \
-  --amp --phase_free_amp --hip_splay_penalty --smoke \
+  --amp --phase_free_amp --directional_amp --hip_splay_penalty --smoke \
   --stop_after_updates 4 --run_dir runs/smoke
 ```
 
@@ -38,7 +46,7 @@ python go2_arm/train_duet.py --headless --device cpu --num_envs 8 \
 
 ```bash
 python go2_arm/train_duet.py --headless --device cuda:0 --num_envs 4096 \
-  --amp --phase_free_amp --hip_splay_penalty \
+  --amp --phase_free_amp --directional_amp --hip_splay_penalty \
   --stop_after_updates 10000 --run_dir runs/amp_phase_free
 python go2_arm/training_status.py runs/amp_phase_free
 ```
@@ -74,6 +82,8 @@ python tools/direction_probe.py --package go2_arm --headless --device cpu \
 | --- | --- |
 | `go2_arm/train_duet.py` | 双策略 PPO、阶段课程、AMP 奖励及检查点 |
 | `go2_arm/duet_env.py` | 自由底盘、观测、奖励和碰撞终止 |
-| `go2_arm/stage1_amp.py` | 速度条件判别器和参考动作采样 |
+| `go2_arm/stage1_amp.py` | 基础 AMP 判别器和参考动作采样 |
+| `go2_arm/directional_amp.py` | 方向匹配的参考采样和实测运动历史 |
+| `go2_arm/air_time.py` | 基于实际腾空和触地的奖励 |
 | `go2_arm/live_controller.py` | 加载策略、执行指令并发布状态 |
 | `go2_arm/control_panel.py` | 速度滑块、机械臂控制、实时相机和外部视角 |

@@ -9,10 +9,13 @@ p.add_argument('--hip_splay_penalty', action='store_true', help='Penalize excess
 gait_mode=p.add_mutually_exclusive_group()
 gait_mode.add_argument('--coordinated_trot', action='store_true', help='Use cadence-matched diagonal gait and anti-slip rewards')
 gait_mode.add_argument('--phase_free_amp', action='store_true', help='Learn style with AMP without gait phase observations or targets')
+p.add_argument('--directional_amp', action='store_true', help='Use direction-matched references, motion history and measured touchdown reward')
 p.add_argument('--stop_after_updates', type=int, help='Stop after this many new updates and save a trial checkpoint')
 AppLauncher.add_app_launcher_args(p);args=p.parse_args()
 if args.phase_free_amp and not args.amp:
  p.error('--phase_free_amp requires --amp')
+if args.directional_amp and not args.phase_free_amp:
+ p.error('--directional_amp requires --amp --phase_free_amp')
 if args.stop_after_updates is not None and args.stop_after_updates <= 0:
  p.error('--stop_after_updates must be positive')
 R=Path(__file__).resolve().parent
@@ -30,6 +33,7 @@ try:
  cfg.hip_splay_penalty=args.hip_splay_penalty
  cfg.coordinated_trot=args.coordinated_trot
  cfg.phase_free_amp=args.phase_free_amp
+ cfg.directional_amp=args.directional_amp
  if not args.smoke:
   shutil.copytree(R/'robot',run/'robot');cfg.robot.spawn.usd_path=str(run/'robot/usd/robot.usd')
   (run/'source').mkdir()
@@ -42,7 +46,10 @@ try:
  assert not env.robot.is_fixed_base,'Locomotion training requires a free root'
  loco=make_ppo(observations(env.get_loco_observation()),12,args.device);arm=make_ppo(observations(env.get_arm_observation()),8,args.device)
  assert not ({id(p) for p in loco.actor.parameters()}&{id(p) for p in arm.actor.parameters()})
- if args.amp:
+ if args.directional_amp:
+  from directional_amp import DirectionalAMP
+  amp=DirectionalAMP(R/'amp_reference',env)
+ elif args.amp:
   from stage1_amp import Stage1AMP
   amp=Stage1AMP(R/'amp_reference',env)
  else:
@@ -73,6 +80,10 @@ try:
    gait_phase_observation=False,gait_phase_reward=False,foot_slip_cost_weight=COORDINATED_TROT['slip_cost_weight'],
    foot_slip_scale_mps=COORDINATED_TROT['slip_scale_mps'],foot_contact_height_m=COORDINATED_TROT['contact_height_m'])
   assert manifest['loco_obs_dim']==69 and not hasattr(env,'phase')
+  if args.directional_amp:
+   from air_time import AIR_TIME_REWARD
+   manifest.update(directional_amp=True,air_time_reward=AIR_TIME_REWARD,
+    gait_reward_revision='amp_direction_matched_contact_slip_air_time_v2',lateral_command_min_mps=.12)
  else:
   manifest.update(gait_reward_revision='diagonal_trot_footcenter_clearance_placement_v9',foot_swing_peak_clearance_m=.04,gait_name='diagonal_trot',gait_leg_order=['FL','FR','RL','RR'],gait_phase_offsets=[0.,.5,.5,0.],gait_frequency_hz=3.,gait_reward_weight=6.,gait_clearance_cost_weight=4.,gait_placement_cost_weight=25.,gait_standing_mode='four_feet_support')
   if args.coordinated_trot:
@@ -118,7 +129,9 @@ try:
    next_level=next_stage1_level(env.stage1_curriculum_level,env.success_ema,i,last_advance)
    if next_level!=env.stage1_curriculum_level:
     gate_success=env.success_ema
-    with torch.inference_mode():env.set_stage1_curriculum(next_level)
+    with torch.inference_mode():
+     env.set_stage1_curriculum(next_level)
+     if args.directional_amp:amp.clear_history()
     last_advance=i
     print('STAGE1_CURRICULUM_ADVANCED',json.dumps({'iteration':i,'level':next_level,'range_scale':env.range_scale,'guidance_cap_deg':env.guidance_cap_deg,'previous_success_ema':gate_success}),flush=True)
   elif i-last_advance>=500 and env.success_ema>.7 and env.level<2 and env.precision_success_ema>.5:
@@ -134,17 +147,20 @@ try:
     lo=observations(env.get_loco_observation());la=loco.act(lo)
     loco_clips.append(float((la.abs()>1).float().mean()));arm_clips.append(float((aa.abs()>1).float().mean()))
     action=torch.cat([la,aa[:,:6],torch.zeros(env.num_envs,1,device=env.device)],-1)
-    if active_amp:
+    if active_amp and not args.directional_amp:
      before=amp.observe(env)
     _,_,term,trunc,extras=env.step(action)
     dones=term|trunc;failures+=int(term.sum());extra={'time_outs':trunc&~term}
     next_lo=observations(env.get_loco_observation());next_ao=observations(env.get_arm_observation())
     leg_reward=env.loco_reward
     if active_amp:
-     pair=amp.transition(before,amp.observe(env),env.commands[:,:3])
-     style_reward=amp.reward(pair,dones,amp_updates+1,env.step_dt)
+     if args.directional_amp:
+      pair,valid=amp.record(amp.observe(env),env.commands[:,:3],dones)
+     else:
+      pair=amp.transition(before,amp.observe(env),env.commands[:,:3]);valid=~dones
+     style_reward=amp.reward(pair,~valid,amp_updates+1,env.step_dt)
      leg_reward=leg_reward+style_reward
-     amp_rollout.append(pair);amp_valid.append(~dones);amp_rewards.append(style_reward.mean())
+     amp_rollout.append(pair);amp_valid.append(valid);amp_rewards.append(style_reward.mean())
     loco.process_env_step(next_lo,leg_reward,dones,extra)
     if env.training_stage==2:arm.process_env_step(next_ao,env.arm_reward,dones,extra)
     rew_l.append(float(env.loco_reward.mean()));rew_a.append(float(env.arm_reward.mean()))
@@ -157,6 +173,7 @@ try:
   if active_amp:
    amp_stats=amp.update(amp_rollout,amp_valid)
    amp_stats['mean_style_reward']=float(torch.stack(amp_rewards).mean())
+   if args.directional_amp:amp_stats['matched_history_fraction']=amp_stats['valid_transitions']/(env.num_envs*24)
    if not np.isfinite(list(amp_stats.values())).all():
     raise RuntimeError('Non-finite AMP optimization metrics')
    amp_updates+=1

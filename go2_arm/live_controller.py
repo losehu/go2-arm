@@ -65,6 +65,7 @@ try:
  cfg=DuetCfg();cfg.scene.num_envs=1;cfg.sim.device=args.device;cfg.episode_length_s=3600
  cfg.coordinated_trot='coordinated_trot' in saved.get('manifest',{})
  cfg.phase_free_amp=saved.get('manifest',{}).get('phase_free_amp',False)
+ cfg.directional_amp=saved.get('manifest',{}).get('directional_amp',False)
  cfg.robot.init_state.joint_pos.update(dict(zip(JOINT_NAMES,PREVIEW_DEFAULT_Q[7:].tolist())))
  env=LiveEnv(cfg);env.reset()
  if saved.get('format')!='roboduet_dualmode_v1':raise ValueError('This worker requires a new dual-policy checkpoint')

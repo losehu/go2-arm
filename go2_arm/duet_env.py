@@ -16,6 +16,7 @@ from posture_objective import posture_objective
 from tracking_objective import tracking_error_objective
 from foot_gait import coordinated_trot_terms, foot_centers, gait_terms, planted_foot_cost, trot_frequency, trot_placement_time
 from hip_splay import hip_splay
+from air_time import AirTimeReward
 from geometry import rpy_matrix,rot6d,rotation_error,base_to_heading,heading_to_base,damped_ik
 
 @configclass
@@ -23,6 +24,7 @@ class DuetCfg(DualModeCfg):
     hip_splay_penalty: bool = False
     coordinated_trot: bool = False
     phase_free_amp: bool = False
+    directional_amp: bool = False
 
 class DuetEnv(DualModeEnv):
     def __init__(self,cfg,**kwargs):
@@ -49,6 +51,9 @@ class DuetEnv(DualModeEnv):
         self.foot_stats=torch.zeros(n,9,device=d)
         if cfg.coordinated_trot or cfg.phase_free_amp:
             self.trot_stats=torch.zeros(n,6,device=d)
+        if cfg.directional_amp:
+            self.air_time_reward=AirTimeReward(n,d)
+            self.air_time_sums=torch.zeros(n,device=d)
         if cfg.hip_splay_penalty:
             self.hip_splay_stats=torch.zeros(n,9,device=d)
         self.acceptance={'whole_body':False};self.stage1_pass_ema=0.;self.log_metrics={}
@@ -85,7 +90,10 @@ class DuetEnv(DualModeEnv):
             caps=torch.tensor([1.,.6,.8],device=self.device)*self.range_scale
             axis=torch.randint(0,3,(len(ids),),device=self.device)
             c=torch.zeros(len(ids),3,device=self.device)
-            c[torch.arange(len(ids),device=self.device),axis]=(.5+.5*torch.rand(len(ids),device=self.device))*caps[axis]*torch.where(torch.rand(len(ids),device=self.device)>.5,1.,-1.)
+            low=.5*caps
+            if self.cfg.directional_amp:low[1]=.12
+            magnitude=low[axis]+(caps[axis]-low[axis])*torch.rand(len(ids),device=self.device)
+            c[torch.arange(len(ids),device=self.device),axis]=magnitude*torch.where(torch.rand(len(ids),device=self.device)>.5,1.,-1.)
             mixed=torch.rand(len(ids),device=self.device)<.25
             c[mixed]+=(2*torch.rand(int(mixed.sum()),3,device=self.device)-1)*caps*.25
             c=c.clamp(-caps,caps);c[torch.rand(len(ids),device=self.device)<.1]=0
@@ -283,6 +291,11 @@ class DuetEnv(DualModeEnv):
             splay_cost,hip_deg,hip_excess=hip_splay(self.robot.data.joint_pos[:,self.legs[::3]],self.commands)
             self.hip_splay_stats+=torch.cat([hip_deg,hip_excess.float(),splay_cost[:,None]],dim=-1)
         self.loco_reward=(tracking+posture+gait_reward-arm_hold_cost-splay_cost+regular+collision+.2+(.2*task if self.training_stage==2 else 0))*self.step_dt
+        if self.cfg.directional_amp:
+            move=self.commands[:,:2].norm(dim=-1)>.06
+            bonus=self.air_time_reward.step(foot_contact,foot_clearance,move,self.step_dt)
+            self.loco_reward+=bonus
+            self.air_time_sums+=bonus
         self.arm_reward=(task+posture+smooth+collision+.2*tracking)*self.step_dt
         self.steps+=1;self.roll_sums+=self.roll_error.square()
         self.sums+=torch.cat([ev.square(),ew.square()[:,None],ep.square()[:,None],ea.square(),self.bad_contact.float()[:,None],(head<.02).float()[:,None],self.tcp_pos_error.square()[:,None],self.tcp_rot_error.square()[:,None]],-1)
@@ -338,6 +351,10 @@ class DuetEnv(DualModeEnv):
                     self.log_metrics[f'{leg}_hip_excess_fraction']=hip[4+j]
                 self.log_metrics['hip_splay_cost_mean']=hip[8]
                 self.hip_splay_stats[ids]=0
+            if self.cfg.directional_amp:
+                self.log_metrics['air_time_reward_per_step']=float(self.air_time_sums[ids].sum()/count.sum().clamp_min(1))
+                self.air_time_sums[ids]=0
+                self.air_time_reward.reset(ids)
             self.extras['log']=self.log_metrics
         self.robot.reset(ids);DirectRLEnv._reset_idx(self,ids)
         root=self.robot.data.default_root_state[ids].clone();root[:,:3]+=self.scene.env_origins[ids]

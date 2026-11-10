@@ -20,7 +20,7 @@ try:
  torch.set_num_threads(2);torch.manual_seed(args.seed)
  cases=[('stop',[0.,0.,0.])]
  for axis,lim in enumerate([.75,.45,.6]):
-  for speed in [.12,lim]:
+  for speed in ([.12,.23,.40,lim] if axis==1 else [.12,lim]):
    for sign in [1,-1]:
     c=[0.,0.,0.];c[axis]=speed*sign
     cases.append((f'{["vx","vy","wz"][axis]}_{speed*sign:+.2f}',c))
@@ -80,6 +80,7 @@ try:
  cfg=DuetCfg();cfg.scene.num_envs=n;cfg.scene.env_spacing=10.;cfg.sim.device='cpu';cfg.seed=args.seed
  if hasattr(cfg,'coordinated_trot'):cfg.coordinated_trot='coordinated_trot' in saved.get('manifest',{})
  if hasattr(cfg,'phase_free_amp'):cfg.phase_free_amp=saved.get('manifest',{}).get('phase_free_amp',False)
+ if hasattr(cfg,'directional_amp'):cfg.directional_amp=saved.get('manifest',{}).get('directional_amp',False)
  env=Probe(cfg);env.reset();env.grip_target.fill_(.5)
  env.foot_ids=[env.robot.body_names.index(f'{x}_calf') for x in ['FL','FR','RL','RR']]
  env.foot_offset=torch.tensor([-.002,0.,-.213]).expand(n,4,3).clone()

@@ -30,6 +30,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bundle", required=True, type=Path,
                         help="Existing model package containing robot/ and path_bank.npz")
+    parser.add_argument("--recordings", type=Path, help="Install locally qualified supplemental recordings")
     parser.add_argument("--skip-reference", action="store_true", help="Install only the data needed for inference")
     args = parser.parse_args()
     bundle = args.bundle.resolve(strict=True)
@@ -66,6 +67,19 @@ def main():
         install(dest, data, expected)
     revision = {k: ref[k] for k in ("repository", "commit", "date")}
     (clips / "revision.json").write_text(json.dumps(revision, indent=2) + "\n")
+    recording_dir = args.recordings if args.recordings else bundle / "amp_reference"
+    recording_manifest = recording_dir / "recording_manifest.json"
+    if args.recordings or recording_manifest.is_file():
+        report = json.loads(recording_manifest.read_text())
+        if report["source"] != "fixed_command_free_base_physx_policy_recording":
+            raise ValueError("Unexpected supplemental clip provenance")
+        for entry in report["clips"]:
+            name = entry["file"]
+            if Path(name).name != name or not name.startswith("go2_recorded_"):
+                raise ValueError(f"Invalid recording file name: {name}")
+            install(clips / name, (recording_dir / name).read_bytes(), entry["sha256"])
+        (clips / "recording_manifest.json").write_text(json.dumps(report, indent=2) + "\n")
+        print(f"Supplemental recordings verified: {len(report['clips'])}")
     print(f"Robot and trajectory files verified with {len(ref['clips'])} AMP reference clips.")
 
 

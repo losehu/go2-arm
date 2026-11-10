@@ -39,13 +39,16 @@ def foot_positions(q):
     )
 
 
-def motion_features(q, qd):
+def motion_features(q, qd, feet=None):
     # Reconstruct both expert and policy foot positions with the same geometry.
     # The recorded foot frames have an offset relative to this URDF's frames.
-    return torch.cat((q, 0.1 * qd, 4.0 * foot_positions(q).flatten(1)), dim=-1)
+    feet = foot_positions(q) if feet is None else feet
+    return torch.cat((q, 0.1 * qd, 4.0 * feet.flatten(1)), dim=-1)
 
 
 class Stage1AMP:
+    motion_size = MOTION_PAIR_SIZE
+
     def __init__(self, directory: Path, env):
         self.device = env.device
         self.command_scale = torch.tensor(COMMAND_SCALE, device=self.device)
@@ -56,6 +59,8 @@ class Stage1AMP:
         clip_velocities = []
         clips = []
         for path in sorted(directory.glob("go2_*.txt")):
+            if path.name.startswith("go2_recorded_"):
+                continue
             raw = path.read_bytes()
             clip = json.loads(raw)
             frames = np.asarray(clip["Frames"], dtype=np.float32)
@@ -151,7 +156,7 @@ class Stage1AMP:
         for _ in range(4):
             ids = torch.randint(len(samples), (min(1024, len(samples)),), device=self.device, generator=self.rng)
             policy = samples[ids]
-            commands = policy[:, MOTION_PAIR_SIZE:]
+            commands = policy[:, self.motion_size:]
             expert = self.sample_expert(commands).requires_grad_()
             expert_score = self.discriminator(torch.cat((expert, commands), dim=-1))
             policy_score = self.discriminator(policy)
