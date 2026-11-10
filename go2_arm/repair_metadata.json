@@ -1,0 +1,4 @@
+{
+  "parent_run": null,
+  "stage1_budget_basis": "Measured v4 level durations2988/3189/708/12605/510: full-range8deg required12605 updates and promoted at19490. At20000, level4 had only510 updates (10 beyond observation grace), level5 had0. Matched-seed checkpoint tests show11.5deg pass-count improvement22/17\u219223/19, but15deg20/16 with one termination per mode. Bounded stage1 cap40000 leaves20510 updates after the observed19490 prefix for11.5/15deg learning; this allocation is a hypothesis, not a convergence guarantee. No automatic extension beyond40000."
+}

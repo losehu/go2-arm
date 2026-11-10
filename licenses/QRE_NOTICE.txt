@@ -1,0 +1,1 @@
+QRE/MYBOTSHOP go2_description public download. Its package.xml declares Proprietary. These locally used camera bracket files are not represented as open-source or as Unitree-official URDF. Source: https://www.docs.mybotshop.de/downloads/go2_description.zip
