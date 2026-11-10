@@ -21,14 +21,14 @@ FEATURE_SIZE = 36
 MOTION_PAIR_SIZE = 2 * FEATURE_SIZE
 
 
-def foot_positions(q):
+def foot_positions(q, toe_x=0.):
     """Go2 foot frame positions in the base frame, in FL/FR/RL/RR order."""
     hip, thigh, calf = q.reshape(-1, 4, 3).unbind(-1)
     side = q.new_tensor([1, -1, 1, -1])
     front = q.new_tensor([1, 1, -1, -1])
     lateral = 0.0955 * side
-    x = -0.213 * (thigh.sin() + (thigh + calf).sin())
-    z = -0.213 * (thigh.cos() + (thigh + calf).cos())
+    x = -0.213 * (thigh.sin() + (thigh + calf).sin()) + toe_x*(thigh + calf).cos()
+    z = -0.213 * (thigh.cos() + (thigh + calf).cos()) - toe_x*(thigh + calf).sin()
     return torch.stack(
         (
             x + 0.1934 * front,

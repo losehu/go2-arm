@@ -3,6 +3,7 @@ import argparse, hashlib, json, os, sys, time, traceback
 from pathlib import Path
 HERE = Path(__file__).resolve().parent
 from isaaclab.app import AppLauncher
+from gait_metrics import measured_swing
 p = argparse.ArgumentParser()
 p.add_argument('--checkpoint', type=Path, required=True)
 p.add_argument('--package', type=Path, required=True)
@@ -10,6 +11,7 @@ p.add_argument('--output', type=Path, required=True)
 p.add_argument('--seed', type=int, default=61119)
 p.add_argument('--focus',action='store_true')
 p.add_argument('--only_forward',action='store_true')
+p.add_argument('--case',action='append',help='Only run a named case (repeatable)')
 AppLauncher.add_app_launcher_args(p)
 args=p.parse_args();sys.path.insert(0,str(args.package.resolve()));app=AppLauncher(args).app
 try:
@@ -20,12 +22,24 @@ try:
  torch.set_num_threads(2);torch.manual_seed(args.seed)
  cases=[('stop',[0.,0.,0.])]
  for axis,lim in enumerate([.75,.45,.6]):
-  for speed in ([.12,.23,.40,lim] if axis==1 else [.12,lim]):
+  for speed in ([.12,.23,.40,lim] if axis==1 else ([.12,.40,lim] if axis==0 else [.12,lim])):
    for sign in [1,-1]:
     c=[0.,0.,0.];c[axis]=speed*sign
     cases.append((f'{["vx","vy","wz"][axis]}_{speed*sign:+.2f}',c))
+ for sx in (1,-1):
+  for sy in (1,-1):
+   cases.append((f'diagonal_{sx:+d}_{sy:+d}',[sx*.45,sy*.23,0.]))
+   cases.append((f'diagonal_fast_{sx:+d}_{sy:+d}',[sx*.60,sy*.30,0.]))
+   cases.append((f'walk_turn_{sx:+d}_{sy:+d}',[sx*.45,0.,sy*.30]))
+   cases.append((f'lateral_turn_{sx:+d}_{sy:+d}',[0.,sx*.23,sy*.30]))
+   for sw in (1,-1):
+    cases.append((f'diagonal_turn_{sx:+d}_{sy:+d}_{sw:+d}',[sx*.45,sy*.23,sw*.30]))
  if args.focus:cases=[x for x in cases if x[0].startswith('vx_')]
  if args.only_forward:cases=[x for x in cases if x[0].startswith('vx_+')]
+ if args.case:
+  known={name for name,_ in cases}
+  if set(args.case)-known:p.error(f'Unknown cases: {sorted(set(args.case)-known)}')
+  cases=[x for x in cases if x[0] in args.case]
  N=len(cases);n=2*N;commands=torch.tensor([c for _,c in cases]*2)
  class Probe(DuetEnv):
   def _sample_base_commands(self,ids):
@@ -63,7 +77,7 @@ try:
      if i in self.finished:continue
      t=float(self.episode_length_buf[i])*self.step_dt
      row={'t':t,'command':self.commands[i,:3].tolist(),'velocity':torch.cat([self.robot.data.root_lin_vel_b[i,:2],self.robot.data.root_ang_vel_b[i,2:3]]).tolist(),
-       'height':float(self.robot.data.root_pos_w[i,2]),'pitch_deg':float(torch.rad2deg(self.actual_pitch[i])),
+       'height':float(self.robot.data.root_link_pos_w[i,2]-self.scene.env_origins[i,2]),'pitch_deg':float(torch.rad2deg(self.actual_pitch[i])),
        'roll_deg':float(torch.rad2deg(self.actual_roll[i])),'joint_error_deg':torch.rad2deg(self.robot.data.joint_pos[i,self.arm]-self.ref[i]).tolist(),'tcp_error_m':float(self.tcp_pos_error[i]),'tcp_orientation_error_deg':float(torch.rad2deg(self.tcp_rot_error[i])),'head_clearance':float(head[i]),'foot_clearance':clearance[i].tolist(),'foot_speed_xy':velocity[i,:,:2].norm(dim=-1).tolist(),
        'calf_com_speed':calf_velocity[i].norm(dim=-1).tolist(),'foot_center_speed':velocity[i].norm(dim=-1).tolist(),
        'raw_actions':self.raw_actions[i,:12].tolist(),'actions':self.actions[i,:12].tolist(),'filtered':self.filtered[i,:12].tolist(),'leg_joint_q':self.robot.data.joint_pos[i,self.legs].tolist(),'leg_target':(self.nominal[i,self.legs]+.35*self.filtered[i,:12]).tolist(),'leg_torque':self.last_tau[i,:12].tolist(),'foot_force':forces[i,self.feet].tolist(),'foot_position':point[i].tolist(),'root_position':self.robot.data.root_pos_w[i].tolist(),'contact':contact[i].tolist(),'swing':swing[i].tolist(),'sliding':sliding[i].tolist(),
@@ -101,6 +115,11 @@ try:
   diagonal_b=contact[:,1]&contact[:,2]&~contact[:,0]&~contact[:,3]
   hip=np.array([r['hip_outward_deg'] for r in rows])
   width=np.array([r['foot_pair_width_m'] for r in rows])
+  observed=measured_swing(contact,clear,env.step_dt)
+  swing_samples=sum(observed['swing_sample_count'])
+  actual_low=sum(n*(fraction or 0.) for n,fraction in zip(
+      observed['swing_sample_count'],observed['swing_samples_below_1cm_fraction']))/swing_samples if swing_samples else None
+  heights=np.array([r['height'] for r in rows])
   result.append(dict(env.finished[i],case=cases[i%N][0],policy='mean' if i<N else 'sampled',
     velocity_rmse=np.sqrt(np.mean(err**2,axis=0)).tolist(),pitch_rmse_deg=float(np.sqrt(np.mean(np.array([r['pitch_deg'] for r in rows])**2))),
     exclusive_diagonal_support_fraction=float((diagonal_a|diagonal_b).mean()),
@@ -113,7 +132,10 @@ try:
     hip_outward_over_18deg_fraction=(hip>18).mean(axis=0).tolist(),
     foot_pair_width_mean_m=width.mean(axis=0).tolist(),
     sliding_contact_fraction=float(np.sum(np.array([r['sliding'] for r in rows]))/max(1,contact.sum())),
-    swing_below_1cm_fraction=float((clear[swing]<.01).mean()) if swing.any() else None,
+    swing_below_1cm_fraction=(actual_low if getattr(cfg,'phase_free_amp',False) else
+                               float((clear[swing]<.01).mean()) if swing.any() else None),
+    measured_swing=observed,root_height_p05_m=float(np.percentile(heights,5)),
+    root_below_28p5cm_fraction=float((heights<.285).mean()),
     foot_clearance_p95_m=np.percentile(clear,95,axis=0).tolist(),min_root_height=min(r['height'] for r in trace),
     roll_rmse_deg=float(np.sqrt(np.mean(np.array([r['roll_deg'] for r in rows])**2))),
     joint_rmse_deg=np.sqrt(np.mean(np.array([r['joint_error_deg'] for r in rows])**2,axis=0)).tolist(),
@@ -125,7 +147,7 @@ try:
  report={'seed':args.seed,'checkpoint':str(args.checkpoint),'sha256':hashlib.sha256(args.checkpoint.read_bytes()).hexdigest(),
   'physics':'PhysX CPU','is_fixed_base':False,'mass_kg':float(env.robot.root_physx_view.get_masses()[0].sum()),
   'protocol':'20s fixed command; deterministic mean and sampled action; zero internal attitude reference; first episode only',
-  'planned_swing_available':not getattr(cfg,'phase_free_amp',False),'cases':result,'acceptance_passed':False}
+  'measured_swing_available':True,'planned_swing_available':not getattr(cfg,'phase_free_amp',False),'cases':result,'acceptance_passed':False}
  (args.output/'result.json').write_text(json.dumps(report,indent=2))
  print(json.dumps({'cases':len(result),'physical_terminations':sum(row['physical_termination'] for row in result)}),flush=True)
 except BaseException:

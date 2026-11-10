@@ -49,6 +49,9 @@ try:
  if args.directional_amp:
   from directional_amp import DirectionalAMP
   amp=DirectionalAMP(R/'amp_reference',env)
+  env.amp_command_bank=(amp.command_scale,amp.clip_commands,amp.clip_signatures)
+  env.reset()
+  env.log_metrics={}
  elif args.amp:
   from stage1_amp import Stage1AMP
   amp=Stage1AMP(R/'amp_reference',env)
@@ -82,8 +85,9 @@ try:
   assert manifest['loco_obs_dim']==69 and not hasattr(env,'phase')
   if args.directional_amp:
    from air_time import AIR_TIME_REWARD
-   manifest.update(directional_amp=True,air_time_reward=AIR_TIME_REWARD,
-    gait_reward_revision='amp_direction_matched_contact_slip_air_time_v2',lateral_command_min_mps=.12)
+   from base_height_objective import BASE_HEIGHT_SPEC
+   manifest.update(directional_amp=True,air_time_reward=AIR_TIME_REWARD,base_height_penalty=BASE_HEIGHT_SPEC,
+    gait_reward_revision='amp_direction_speed_matched_contact_slip_air_time_v3',lateral_command_min_mps=.12)
  else:
   manifest.update(gait_reward_revision='diagonal_trot_footcenter_clearance_placement_v9',foot_swing_peak_clearance_m=.04,gait_name='diagonal_trot',gait_leg_order=['FL','FR','RL','RR'],gait_phase_offsets=[0.,.5,.5,0.],gait_frequency_hz=3.,gait_reward_weight=6.,gait_clearance_cost_weight=4.,gait_placement_cost_weight=25.,gait_standing_mode='four_feet_support')
   if args.coordinated_trot:
@@ -169,7 +173,10 @@ try:
   collected=time.time()-tic;learning=time.time()
   if args.smoke and active_amp and i==first_iteration:
    with torch.inference_mode():
-    amp_foot_frame_error_m=amp.validate_foot_frames(env)
+    if args.directional_amp:
+     amp_foot_frame_error_m,amp_foot_velocity_error_mps,amp_mixed_frame_error_mps=amp.verify_foot_kinematics(env)
+    else:
+     amp_foot_frame_error_m=amp.validate_foot_frames(env)
   if active_amp:
    amp_stats=amp.update(amp_rollout,amp_valid)
    amp_stats['mean_style_reward']=float(torch.stack(amp_rewards).mean())
@@ -186,6 +193,7 @@ try:
   if active_amp:
    state['amp']=amp_stats
    state['amp_updates']=amp_updates
+   if args.directional_amp and (i%10==0 or args.smoke):state['amp_coverage']=amp.coverage(amp_rollout,amp_valid)
    for key,value in amp_stats.items():
     writer.add_scalar('amp/'+key,value,i)
   state['optimization']={**{'loco/'+k:float(v) for k,v in loss_l.items()},**{'arm/'+k:float(v) for k,v in loss_a.items()}}
@@ -213,6 +221,9 @@ try:
    assert not torch.equal(start_discriminator,next(amp.discriminator.parameters()))
    final['amp']=amp_stats
    final['amp_foot_frame_max_error_m']=amp_foot_frame_error_m
+   if args.directional_amp:
+    final.update(amp_foot_velocity_max_error_mps=amp_foot_velocity_error_mps,
+                 amp_mixed_frame_max_error_mps=amp_mixed_frame_error_mps)
   loaded=torch.load(final_checkpoint,map_location=args.device,weights_only=False)
   with torch.inference_mode():
    for name,alg,getter,dim in [('loco',loco,env.get_loco_observation,12),('arm',arm,env.get_arm_observation,8)]:

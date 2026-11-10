@@ -17,19 +17,51 @@ HISTORY_FRAMES = max(HISTORY_LAGS) + 1
 DIRECTION_DEADBAND = .08  # In normalized command coordinates.
 SPEED_TEMPERATURE = .025
 HISTORY_COMMAND_TOLERANCE = .10
+MAX_SPEED_DISTANCE = .30
+TOE_X = -.002
+SPEED_BAND_EDGES = (.33, .66)
+GUIDED_MIXED_FRACTION = .80
+GUIDED_JITTER = .035
 
 
 def command_signature(commands):
     return torch.where(commands.abs() >= DIRECTION_DEADBAND, commands.sign(), 0.)
 
 
-def clip_probabilities(commands, clip_commands, clip_signatures):
-    allowed = (command_signature(commands)[:, None] == clip_signatures).all(dim=-1)
-    supported = allowed.any(dim=-1)
+def matched_references(commands, clip_commands, clip_signatures):
+    same_direction = (command_signature(commands)[:, None] == clip_signatures).all(dim=-1)
     distance = (commands[:, None] - clip_commands).square().sum(dim=-1)
-    # Unsupported commands are excluded from the AMP reward and the discriminator update.
+    return same_direction & (distance <= MAX_SPEED_DISTANCE**2), distance
+
+
+def clip_probabilities(commands, clip_commands, clip_signatures):
+    allowed, distance = matched_references(commands, clip_commands, clip_signatures)
+    supported = allowed.any(dim=-1)
+    # Unsupported commands are excluded before training or scoring the AMP prior.
     logits = torch.where(supported[:, None], (-distance / SPEED_TEMPERATURE).masked_fill(~allowed, -torch.inf), 0.)
     return torch.softmax(logits, dim=-1), supported
+
+
+def guide_mixed_targets(commands, caps, clip_commands, clip_signatures, generator=None):
+    """Guide some targets to nearby qualified speeds while keeping the requested direction."""
+    signatures = command_signature(commands)
+    selected = (signatures.count_nonzero(dim=-1) > 1) & (
+        torch.rand(len(commands), device=commands.device, generator=generator) < GUIDED_MIXED_FRACTION)
+    ids = torch.where(selected)[0]
+    target = commands[ids]
+    center = (clip_signatures * (clip_signatures*clip_commands).clamp_min(
+        DIRECTION_DEADBAND + GUIDED_JITTER)).clamp(-caps, caps)
+    # Reserve room for jitter before deciding whether a center is admissible.
+    eligible = ((center-clip_commands).norm(dim=-1) <= MAX_SPEED_DISTANCE - math.sqrt(3)*GUIDED_JITTER)
+    same = (signatures[ids, None] == clip_signatures).all(dim=-1)
+    distance = (target[:, None] - center).square().sum(dim=-1).masked_fill(~(same & eligible), torch.inf)
+    nearest = distance.argmin(dim=-1)
+    active = clip_signatures[nearest] != 0
+    noise = 2*torch.rand(target.shape, device=commands.device, generator=generator)-1
+    adjusted = (center[nearest] + GUIDED_JITTER*noise*active).clamp(-caps, caps)
+    result = commands.clone()
+    result[ids] = torch.where((same & eligible).any(dim=-1, keepdim=True), adjusted, target)
+    return result
 
 
 def down_in_base(q_xyzw):
@@ -37,13 +69,17 @@ def down_in_base(q_xyzw):
     return torch.stack((2 * (w*y-x*z), -2 * (y*z+w*x), 2 * (x*x+y*y)-1), dim=-1)
 
 
-def whole_body_features(q, qd, linear_b, angular_b, height, down_b):
-    feet = foot_positions(q)
-    # The same FK and velocity calculation runs for both 50 Hz reference
-    # recordings and measured simulation state. No contact labels are inferred.
-    relative_speed = (foot_positions(q + .001*qd) - foot_positions(q - .001*qd)) / .002
-    feet_speed = relative_speed + linear_b[:, None] + torch.linalg.cross(
+def foot_velocity(q, qd, feet, linear_b, angular_b):
+    # Symmetric finite difference of the same collision-sphere FK on both data sources.
+    delta = .0005*qd
+    relative_speed = (foot_positions(q + delta, TOE_X) - foot_positions(q - delta, TOE_X)) / .001
+    return relative_speed + linear_b[:, None] + torch.linalg.cross(
         angular_b[:, None].expand_as(feet), feet, dim=-1)
+
+
+def whole_body_features(q, qd, linear_b, angular_b, height, down_b):
+    feet = foot_positions(q, TOE_X)
+    feet_speed = foot_velocity(q, qd, feet, linear_b, angular_b)
     ground_clearance = height[:, None] - (feet * down_b[:, None]).sum(dim=-1) - .022
     return torch.cat((motion_features(q, qd, feet), linear_b, .5*angular_b, 4.*(height[:, None]-.31),
                       4.*ground_clearance, .5*feet_speed.flatten(1)), dim=-1)
@@ -67,6 +103,8 @@ class DirectionalAMP(Stage1AMP):
             report = json.loads(recordings.read_text())
             if report["source"] != "fixed_command_free_base_physx_policy_recording":
                 raise ValueError("Unexpected supplemental clip provenance")
+            if report.get("linear_velocity_frame") != "root_link" or report.get("swing_quality_revision") != "measured_swing_v1":
+                raise ValueError("Re-record supplemental clips with root-link velocity and measured swing screening")
             recorded = report["clips"]
             for entry in recorded:
                 name = entry["file"]
@@ -123,11 +161,13 @@ class DirectionalAMP(Stage1AMP):
         self.count = torch.zeros(env.num_envs, dtype=torch.long, device=self.device)
         self.cursor = -1
         self.metadata = {
-            **revision, "revision": "direction_matched_whole_body_history_v2",
+            **revision, "revision": "direction_and_speed_matched_link_history_v3",
             "leg_order": list(LEG_ORDER), "frame_dt_s": env.step_dt,
             "history_lags": list(HISTORY_LAGS), "feature_size": FEATURES,
             "direction_deadband": DIRECTION_DEADBAND, "speed_temperature": SPEED_TEMPERATURE,
-            "clips": clips, "expert_transitions": len(self.expert_pairs),
+            "max_normalized_speed_distance": MAX_SPEED_DISTANCE, "linear_velocity_frame": "root_link",
+            "coverage_speed_band_edges": list(SPEED_BAND_EDGES), "guided_mixed_target_fraction": GUIDED_MIXED_FRACTION,
+            "guided_jitter_normalized": GUIDED_JITTER, "clips": clips, "expert_transitions": len(self.expert_pairs),
             "recorded_clips": len(recorded), "reward_max_per_second": AMP_REWARD_PER_SECOND,
             "ramp_updates": AMP_RAMP_UPDATES, "uses_reference_state_resets": False,
             "keeps_existing_gait_reward": False,
@@ -138,7 +178,7 @@ class DirectionalAMP(Stage1AMP):
         data = env.robot.data
         height = data.root_link_pos_w[:, 2] - env.scene.env_origins[:, 2]
         return whole_body_features(data.joint_pos[:, env.legs], data.joint_vel[:, env.legs],
-                                   data.root_lin_vel_b, data.root_ang_vel_b, height, data.projected_gravity_b)
+                                   data.root_link_lin_vel_b, data.root_link_ang_vel_b, height, data.projected_gravity_b)
 
     def clear_history(self):
         self.count.zero_()
@@ -151,9 +191,51 @@ class DirectionalAMP(Stage1AMP):
         self.count.copy_(torch.where(done, 0, (self.count + 1).clamp_max(HISTORY_FRAMES)))
         indices = [(self.cursor-lag) % HISTORY_FRAMES for lag in HISTORY_LAGS]
         stable = (self.commands[:, indices] - command[:, None]).abs().amax(dim=(1, 2)) <= HISTORY_COMMAND_TOLERANCE
-        supported = (command_signature(command)[:, None] == self.clip_signatures).all(dim=-1).any(dim=-1)
+        allowed, _ = matched_references(command, self.clip_commands, self.clip_signatures)
+        supported = allowed.any(dim=-1)
         valid = (self.count == HISTORY_FRAMES) & stable & supported
         return torch.cat((self.history[:, indices].flatten(1), command), dim=-1), valid
+
+    def coverage(self, rollout, valid):
+        commands = torch.cat([pair[:, self.motion_size:] for pair in rollout])
+        sign = (command_signature(commands) + 1).long()
+        signature = sign[:, 0]*9 + sign[:, 1]*3 + sign[:, 2]
+        speed = torch.bucketize(commands.abs().amax(dim=-1), commands.new_tensor(SPEED_BAND_EDGES))
+        index = signature*3 + speed
+        counts = torch.stack((torch.bincount(index, minlength=81),
+                              torch.bincount(index[torch.cat(valid)], minlength=81)), dim=-1)
+        result = {}
+        for i, (total, matched) in enumerate(counts.tolist()):
+            if total:
+                key = f"{i//27-1:+d},{(i//9)%3-1:+d},{(i//3)%3-1:+d}:band{i%3}"
+                result[key] = {"samples": total, "matched": matched}
+        return result
+
+    @staticmethod
+    def verify_foot_kinematics(env):
+        from isaaclab.utils.math import quat_apply_inverse
+        from foot_gait import foot_centers
+
+        data = env.robot.data
+        ids = [env.robot.body_names.index(f"{leg}_calf") for leg in LEG_ORDER]
+        world_pos, world_speed = foot_centers(data.body_link_pos_w[:, ids], data.body_link_quat_w[:, ids],
+                                              data.body_com_pos_w[:, ids], data.body_com_lin_vel_w[:, ids],
+                                              data.body_com_ang_vel_w[:, ids])
+        root_q = data.root_link_quat_w[:, None].expand(-1, 4, -1)
+        actual_pos = quat_apply_inverse(root_q, world_pos - data.root_link_pos_w[:, None])
+        actual_speed = quat_apply_inverse(root_q, world_speed)
+        q, qd = data.joint_pos[:, env.legs], data.joint_vel[:, env.legs]
+        predicted_pos = foot_positions(q, TOE_X)
+        predicted_speed = foot_velocity(q, qd, predicted_pos, data.root_link_lin_vel_b, data.root_link_ang_vel_b)
+        position_error = float((actual_pos - predicted_pos).norm(dim=-1).max())
+        velocity_error = float((actual_speed - predicted_speed).norm(dim=-1).max())
+        mixed_error = float((actual_speed - predicted_speed -
+                             (data.root_com_lin_vel_b-data.root_link_lin_vel_b)[:, None]).norm(dim=-1).max())
+        if not math.isfinite(position_error) or position_error > .0005:
+            raise RuntimeError(f"AMP foot sphere position mismatch: {position_error:g} m")
+        if not math.isfinite(velocity_error) or velocity_error > .006:
+            raise RuntimeError(f"AMP foot sphere velocity mismatch: {velocity_error:g} m/s")
+        return position_error, velocity_error, mixed_error
 
     def sample_expert(self, commands):
         weights, _ = clip_probabilities(commands, self.clip_commands, self.clip_signatures)

@@ -17,6 +17,8 @@ from tracking_objective import tracking_error_objective
 from foot_gait import coordinated_trot_terms, foot_centers, gait_terms, planted_foot_cost, trot_frequency, trot_placement_time
 from hip_splay import hip_splay
 from air_time import AirTimeReward
+from base_height_objective import BASE_HEIGHT_SPEC,low_base_cost
+from directional_amp import guide_mixed_targets
 from geometry import rpy_matrix,rot6d,rotation_error,base_to_heading,heading_to_base,damped_ik
 
 @configclass
@@ -54,6 +56,7 @@ class DuetEnv(DualModeEnv):
         if cfg.directional_amp:
             self.air_time_reward=AirTimeReward(n,d)
             self.air_time_sums=torch.zeros(n,device=d)
+            self.base_height_sums=torch.zeros(n,2,device=d)
         if cfg.hip_splay_penalty:
             self.hip_splay_stats=torch.zeros(n,9,device=d)
         self.acceptance={'whole_body':False};self.stage1_pass_ema=0.;self.log_metrics={}
@@ -97,6 +100,9 @@ class DuetEnv(DualModeEnv):
             mixed=torch.rand(len(ids),device=self.device)<.25
             c[mixed]+=(2*torch.rand(int(mixed.sum()),3,device=self.device)-1)*caps*.25
             c=c.clamp(-caps,caps);c[torch.rand(len(ids),device=self.device)<.1]=0
+            if self.cfg.directional_amp and hasattr(self,'amp_command_bank'):
+                scale, reference, signatures=self.amp_command_bank
+                c=scale*guide_mixed_targets(c/scale,caps/scale,reference,signatures)
             self.command_targets[ids,:3]=c;self.command_targets[ids,3]=0
             if self.training_stage==1:
                 cap=np.deg2rad(self.guidance_cap_deg)
@@ -294,8 +300,11 @@ class DuetEnv(DualModeEnv):
         if self.cfg.directional_amp:
             move=self.commands[:,:2].norm(dim=-1)>.06
             bonus=self.air_time_reward.step(foot_contact,foot_clearance,move,self.step_dt)
-            self.loco_reward+=bonus
+            height=self.robot.data.root_link_pos_w[:,2]-self.scene.env_origins[:,2]
+            height_cost=low_base_cost(height)
+            self.loco_reward+=bonus-height_cost*self.step_dt
             self.air_time_sums+=bonus
+            self.base_height_sums+=torch.stack((height<BASE_HEIGHT_SPEC["lower_band_m"],height_cost),dim=-1)
         self.arm_reward=(task+posture+smooth+collision+.2*tracking)*self.step_dt
         self.steps+=1;self.roll_sums+=self.roll_error.square()
         self.sums+=torch.cat([ev.square(),ew.square()[:,None],ep.square()[:,None],ea.square(),self.bad_contact.float()[:,None],(head<.02).float()[:,None],self.tcp_pos_error.square()[:,None],self.tcp_rot_error.square()[:,None]],-1)
@@ -353,6 +362,9 @@ class DuetEnv(DualModeEnv):
                 self.hip_splay_stats[ids]=0
             if self.cfg.directional_amp:
                 self.log_metrics['air_time_reward_per_step']=float(self.air_time_sums[ids].sum()/count.sum().clamp_min(1))
+                height_stats=(self.base_height_sums[ids].sum(0)/count.sum().clamp_min(1)).tolist()
+                self.log_metrics.update(root_below_28p5cm_fraction=height_stats[0],root_height_cost_mean=height_stats[1])
+                self.base_height_sums[ids]=0
                 self.air_time_sums[ids]=0
                 self.air_time_reward.reset(ids)
             self.extras['log']=self.log_metrics

@@ -71,8 +71,10 @@ def main():
     recording_manifest = recording_dir / "recording_manifest.json"
     if args.recordings or recording_manifest.is_file():
         report = json.loads(recording_manifest.read_text())
-        if report["source"] != "fixed_command_free_base_physx_policy_recording":
-            raise ValueError("Unexpected supplemental clip provenance")
+        if (report["source"] != "fixed_command_free_base_physx_policy_recording"
+                or report.get("linear_velocity_frame") != "root_link"
+                or report.get("swing_quality_revision") != "measured_swing_v1"):
+            raise ValueError("Supplemental clips require root-link velocity and measured-swing screening. Re-record them and pass --recordings.")
         for entry in report["clips"]:
             name = entry["file"]
             if Path(name).name != name or not name.startswith("go2_recorded_"):

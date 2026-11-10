@@ -11,6 +11,10 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--package", type=Path, required=True)
 parser.add_argument("--checkpoint", type=Path, required=True)
 parser.add_argument("--output", type=Path, required=True)
+parser.add_argument("--suite", choices=("all", "slow", "mixed", "repair"), default="all")
+parser.add_argument("--lift-assist-mm", type=float, default=0., help="Optional teacher-only foot lift after measured liftoff")
+parser.add_argument("--front-lift-scale", type=float, default=1., help="Scale teacher-only assist on the front feet")
+parser.add_argument("--assist-paired", action="store_true", help="Use measured diagonal partner liftoff to assist the weaker side")
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 sys.path.insert(0, str(args.package.resolve()))
@@ -23,6 +27,7 @@ import torch
 from cooperative_ppo import make_ppo, observations
 from duet_env import DuetCfg, DuetEnv
 from foot_gait import foot_centers
+from gait_metrics import measured_swing
 
 
 def mirrored_legs(values):
@@ -35,7 +40,11 @@ def mirrored_observation(obs):
     flipped[:, [1, 3, 5, 7, 46, 47, 49]] *= -1
     for start in (9, 21, 33):
         flipped[:, start:start + 12] = mirrored_legs(obs[:, start:start + 12])
-    for start in (50, 56, 62):
+    phase_width = obs.shape[-1] - 69
+    if phase_width == 8:
+        for start in (50, 54):
+            flipped[:, start:start + 4] = obs[:, start:start + 4][:, [1, 0, 3, 2]]
+    for start in (50 + phase_width, 56 + phase_width, 62 + phase_width):
         flipped[:, start + torch.tensor([0, 3, 5], device=obs.device)] *= -1
     return flipped
 
@@ -43,14 +52,27 @@ def mirrored_observation(obs):
 def main():
     torch.set_num_threads(2)
     torch.manual_seed(61221)
-    candidates = {
-        "slow_lateral": (0., .12, 0.),
-        "diagonal_forward": (.25, .15, 0.),
-        "diagonal_backward": (-.25, .15, 0.),
-        "forward_turn": (.30, 0., .25),
-        "lateral_turn": (0., .23, .20),
-        "diagonal_turn": (.25, .15, .20),
-    }
+    candidates = {"slow_lateral": (0., .12, 0.)} if args.suite != "mixed" else {}
+    if args.suite in ("all","slow"):
+        for speed in (.14,.16,.18,.20):
+            candidates[f"slow_lateral_{round(100*speed)}"] = (0., speed, 0.)
+    if args.suite == "repair":
+        candidates.update(forward_diagonal_3=(.60, .30, 0.), backward_diagonal_3=(-.60, .30, 0.),
+                          forward_diagonal_bridge=(.55, .25, 0.), backward_diagonal_bridge=(-.55, .25, 0.),
+                          forward_turn_1=(.65, 0., .14), backward_turn_1=(-.65, 0., .14),
+                          lateral_counterturn_0=(0., .23, -.20), lateral_turn_1=(0., .37, .14))
+    elif args.suite != "slow":
+        for name, direction in (("forward", 1), ("backward", -1)):
+            for tier, (vx, vy, wz) in enumerate(((.25, .15, .20), (.65, .11, .14), (.18, .37, .14), (.17, .11, .53))):
+                candidates[f"{name}_diagonal_turn_{tier}"] = (direction*vx, vy, wz)
+                candidates[f"{name}_diagonal_counterturn_{tier}"] = (direction*vx, vy, -wz)
+            for tier, (vx, vy) in enumerate(((.25, .15), (.65, .11), (.18, .37), (.60, .30))):
+                candidates[f"{name}_diagonal_{tier}"] = (direction*vx, vy, 0.)
+            for tier, (vx, wz) in enumerate(((.30, .25), (.65, .14), (.17, .53))):
+                candidates[f"{name}_turn_{tier}"] = (direction*vx, 0., wz)
+        for tier, (vy, wz) in enumerate(((.23, .20), (.37, .14), (.10, .53))):
+            candidates[f"lateral_turn_{tier}"] = (0., vy, wz)
+            candidates[f"lateral_counterturn_{tier}"] = (0., vy, -wz)
     cases = [(name + suffix, (vx, direction * vy, direction * wz), direction < 0)
              for name, (vx, vy, wz) in candidates.items()
              for suffix, direction in (("_left", 1), ("_right", -1))]
@@ -58,7 +80,7 @@ def main():
     commands = torch.tensor([case[1] for case in cases], device=args.device)
     mirror = torch.tensor([case[2] for case in cases], device=args.device)
     saved = torch.load(args.checkpoint, map_location=args.device, weights_only=True)
-    assert saved["manifest"]["phase_free_amp"] and saved["manifest"]["loco_obs_dim"] == 69
+    assert saved["manifest"]["loco_obs_dim"] in (69, 77)
     assert saved["training_stage"] == 1
 
     class Recorder(DuetEnv):
@@ -77,7 +99,12 @@ def main():
             return term, trunc
 
     cfg = DuetCfg()
-    cfg.phase_free_amp = True
+    if hasattr(cfg, "phase_free_amp"):
+        cfg.phase_free_amp = saved["manifest"].get("phase_free_amp", False)
+    if hasattr(cfg, "coordinated_trot"):
+        cfg.coordinated_trot = "coordinated_trot" in saved["manifest"]
+    if hasattr(cfg, "directional_amp"):
+        cfg.directional_amp = saved["manifest"].get("directional_amp", False)
     cfg.scene.num_envs = n
     cfg.scene.env_spacing = 20.
     cfg.sim.device = args.device
@@ -95,6 +122,13 @@ def main():
     env.recording = True
     frames, clearance_samples, contacts, slip_samples = [], [], [], []
     zero = torch.zeros(n, 8, device=env.device)
+    time_airborne = torch.zeros((n, 4), device=env.device)
+    assist_side = torch.tensor([True,False,True,False],device=env.device)[None] ^ mirror[:,None]
+    front_lift = commands.new_tensor([args.front_lift_scale,args.front_lift_scale,1.,1.])
+    if not .5 <= args.front_lift_scale <= 2.:
+        raise ValueError("Front lift scale must be within 0.5–2")
+    if not 0. <= args.lift_assist_mm <= 65.:
+        raise ValueError("Lift assist must be within 0–65 mm")
     with torch.inference_mode():
         for step in range(400):
             env.prepare_arm(zero)
@@ -102,6 +136,23 @@ def main():
             obs[mirror] = mirrored_observation(obs[mirror])
             actions = loco.actor(observations(obs))
             actions[mirror] = mirrored_legs(actions[mirror])
+            if args.lift_assist_mm:
+                force_now = env.contact.data.net_forces_w[:, env.feet].norm(dim=-1)
+                grounded = force_now > 1.
+                time_airborne = torch.where(grounded, 0., time_airborne + env.step_dt)
+                signal = time_airborne
+                if args.assist_paired:
+                    signal = time_airborne[:, [3,2,1,0]] * assist_side
+                ramp = (signal/.04).clamp(0., 1.) * ((.26-signal)/.07).clamp(0., 1.)
+                lift = .001*args.lift_assist_mm*front_lift*ramp*grounded.any(dim=-1, keepdim=True)
+                hip, thigh, calf = data.joint_pos[:, env.legs].reshape(n, 4, 3).unbind(dim=-1)
+                knee = thigh + calf
+                dx_thigh, dx_calf = -.213*(thigh.cos()+knee.cos()), -.213*knee.cos()
+                dz_thigh, dz_calf = .213*(thigh.sin()+knee.sin())*hip.cos(), .213*knee.sin()*hip.cos()
+                det = dx_thigh*dz_calf-dx_calf*dz_thigh
+                scale = lift*det/(det.square()+.002**2)
+                correction = torch.stack((torch.zeros_like(lift), -dx_calf*scale, dx_thigh*scale), dim=-1)
+                actions = actions + (correction.flatten(1)/.35).clamp(-.65, .65)
             env.step(torch.cat((actions, zero[:, :7]), dim=-1))
             if step < 100:
                 continue
@@ -117,7 +168,7 @@ def main():
             # toes from joint and root kinematics for both recorded and upstream clips.
             blank_toes = torch.zeros(n, 12, device=env.device)
             frame = torch.cat((root_pos, quat_xyzw, data.joint_pos[:, env.legs], blank_toes,
-                               data.root_lin_vel_b, data.root_ang_vel_b,
+                               data.root_link_lin_vel_b, data.root_link_ang_vel_b,
                                data.joint_vel[:, env.legs], blank_toes), dim=-1)
             frames.append(frame.cpu().numpy())
             clearance_samples.append(clear.cpu().numpy())
@@ -140,11 +191,15 @@ def main():
         p95 = np.percentile(clearance_samples[:, i], 95, axis=0)
         diagonal = float((a | b).mean())
         slip = float(slip_samples[:, i].sum() / max(1, c.sum()))
-        passed = (not bool(env.failed[i]) and max(rmse) <= .06 and diagonal >= .20
-                  and bool(a.any() and b.any()) and min(p95) >= .005 and slip <= .15)
+        swing = measured_swing(c, clearance_samples[:, i], env.step_dt)
+        qualified_swing = all(count >= 3 and peak is not None and peak >= .015 and low <= .25
+                              for count, peak, low in zip(swing["swing_count"], swing["swing_peak_median_m"],
+                                                          swing["swing_peak_below_1cm_fraction"]))
+        passed = (qualified_swing and not bool(env.failed[i]) and max(rmse) <= .06 and diagonal >= .20
+                  and bool(a.any() and b.any()) and slip <= .15)
         results[name] = dict(command=list(command), mirrored_teacher=is_mirrored, passed=passed,
                              physical_failure=bool(env.failed[i]), velocity_rmse=rmse.tolist(),
-                             clearance_p95_m=p95.tolist(), exclusive_diagonal=diagonal, slip=slip)
+                             clearance_p95_m=p95.tolist(), exclusive_diagonal=diagonal, slip=slip, **swing)
         if passed:
             accepted_frames[name] = frames[:, i]
     # Use paired signs only so additional demonstrations do not bias one side.
@@ -159,9 +214,10 @@ def main():
             clips.append({"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
                           "command": results[p]["command"]})
     report = {"source": "fixed_command_free_base_physx_policy_recording",
-              "teacher_checkpoint_sha256": sha, "seed": 61221, "clips": clips, "results": results}
+              "linear_velocity_frame": "root_link", "swing_quality_revision": "measured_swing_v1",
+              "teacher_checkpoint_sha256": sha, "teacher_lift_assist_mm": args.lift_assist_mm, "teacher_assist_paired": args.assist_paired, "teacher_front_lift_scale": args.front_lift_scale, "seed": 61221, "clips": clips, "results": results}
     (args.output / "recording_manifest.json").write_text(json.dumps(report, indent=2) + "\n")
-    print(json.dumps({"clips": [c["file"] for c in clips], "results": results}), flush=True)
+    print(json.dumps({"clips": len(clips), "cases": len(results)}), flush=True)
 
 
 try:
