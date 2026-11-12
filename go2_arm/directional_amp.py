@@ -21,9 +21,9 @@ HISTORY_COMMAND_TOLERANCE = .10
 MAX_SPEED_DISTANCE = .30
 TOE_X = -.002
 SPEED_BAND_EDGES = (.33, .66)
-GUIDED_MIXED_FRACTION = .80
+GUIDED_MIXED_FRACTION = .60
 GUIDED_JITTER = .035
-UNMATCHED_MIXED_FALLBACK_FRACTION = .80
+UNMATCHED_MIXED_FALLBACK_FRACTION = .35
 
 
 def command_signature(commands):
@@ -137,6 +137,7 @@ class DirectionalAMP(Stage1AMP):
                 if Path(name).name != name or not name.startswith("go2_recorded_"):
                     raise ValueError(f"Invalid recording file name: {name}")
         pairs, clips, means, signatures = [], [], [], []
+        command_frames,command_lengths=[],[]
         sources = [(p, None) for p in upstream] + [(directory / c["file"], c) for c in recorded]
         for path, entry in sources:
             raw = path.read_bytes()
@@ -153,6 +154,8 @@ class DirectionalAMP(Stage1AMP):
                                            down_in_base(a[:, 3:7]))
             count = len(features) - max(HISTORY_LAGS)
             pairs.append(torch.cat([features[max(HISTORY_LAGS)-lag:][:count] for lag in HISTORY_LAGS], dim=-1))
+            command_frames.append(a[:, [31,32,36]])
+            command_lengths.append(len(a))
             measured = a[:, [31, 32, 36]].mean(dim=0)
             means.append(measured / self.command_scale)
             if entry is not None:
@@ -175,6 +178,8 @@ class DirectionalAMP(Stage1AMP):
         self.offsets = self.lengths.cumsum(0) - self.lengths
         self.clip_commands = torch.stack(means)
         self.clip_signatures = torch.stack(signatures)
+        self.reference_frame_commands=torch.cat(command_frames)
+        self.reference_frame_lengths=torch.tensor(command_lengths,device=self.device)
         self.rng = torch.Generator(device=self.device).manual_seed(61109)
         with torch.random.fork_rng(devices=[]):
             torch.random.default_generator.manual_seed(61109)
@@ -187,7 +192,7 @@ class DirectionalAMP(Stage1AMP):
         self.count = torch.zeros(env.num_envs, dtype=torch.long, device=self.device)
         self.cursor = -1
         self.metadata = {
-            **revision, "revision": "direction_speed_mixed_fallback_v5",
+            **revision, "revision": "direction_speed_four_foot_v6",
             "leg_order": list(LEG_ORDER), "frame_dt_s": env.step_dt,
             "history_lags": list(HISTORY_LAGS), "feature_size": FEATURES,
             "physical_command_deadzone": VELOCITY_DEADZONE, "speed_temperature": SPEED_TEMPERATURE,

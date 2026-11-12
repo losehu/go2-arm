@@ -11,13 +11,22 @@ from isaaclab.utils.math import matrix_from_quat
 from base_env import DualModeEnv,DualModeCfg,R
 from base_commands import apply_velocity_deadzone
 from curriculum import tracking_terms,motion_gate
-from stage1_schedule import STAGE1_LEVELS
+from stage1_schedule import next_attitude_cap
+from imitation_commands import ImitationCommands, IMITATION_COMMANDS, omni_fraction
 from reference_filter import ReferenceFilter
 from posture_objective import posture_objective
 from tracking_objective import tracking_error_objective
 from foot_gait import coordinated_trot_terms, gait_terms, planted_foot_cost, trot_frequency, trot_placement_time
-from hip_splay import hip_splay
+from hip_splay import hip_splay,inward_hip_cost
 from air_time import AirTimeReward
+from leg_action import filter_action
+from speed_gate import FullSpeedGate
+from swing_clearance import SwingClearance
+from stance_cadence import MeasuredCadence,stance_width_cost,style_reward_factor
+from episode_objective import stage1_reward
+from diagonal_support import DiagonalSupport
+from foot_participation import FootParticipation
+from standing_support import StandingSupport
 from base_height_objective import BASE_HEIGHT_SPEC,low_base_cost
 from directional_amp import fallback_mixed_targets, guide_mixed_targets
 from geometry import rpy_matrix,rot6d,rotation_error,base_to_heading,heading_to_base,damped_ik
@@ -33,7 +42,7 @@ class DuetEnv(DualModeEnv):
     def __init__(self,cfg,**kwargs):
         super().__init__(cfg,**kwargs)
         n=self.num_envs;d=self.device
-        self.training_stage=1;self.training_iteration=0;self.range_scale=.5;self.level=-1;self.curriculum=0
+        self.training_stage=1;self.training_iteration=0;self.range_scale=1.;self.level=-1;self.curriculum=0
         self.stage1_curriculum_level=0;self.guidance_cap_deg=3.;self.last_curriculum_change_iteration=0
         self.guidance=torch.zeros(n,2,device=d);self.guidance_target=torch.zeros_like(self.guidance)
         self.arm_action=torch.zeros(n,8,device=d);self.last_arm_action=torch.zeros_like(self.arm_action)
@@ -58,19 +67,35 @@ class DuetEnv(DualModeEnv):
             self.air_time_reward=AirTimeReward(n,d)
             self.air_time_sums=torch.zeros(n,device=d)
             self.base_height_sums=torch.zeros(n,2,device=d)
+            self.foot_participation=FootParticipation(n,d)
+            self.participation_sums=torch.zeros(n,10,device=d)
+            self.diagonal_support=DiagonalSupport(n,d)
+            self.diagonal_sums=torch.zeros(n,4,device=d)
+            self.measured_cadence=MeasuredCadence(n,d)
+            self.cadence_sums=torch.zeros(n,13,device=d)
+            self.width_sums=torch.zeros(n,5,device=d)
+            self.standing_support=StandingSupport(n,d)
+            self.standing_sums=torch.zeros(n,15,device=d)
         if cfg.hip_splay_penalty:
-            self.hip_splay_stats=torch.zeros(n,9,device=d)
+            self.hip_splay_stats=torch.zeros(n,17,device=d)
+        self.imitation_commands=ImitationCommands(n,d)
+        self.full_speed_learned=False
+        self.command_source_counts=torch.zeros(2,device=d)
+        self.rollout_health=torch.zeros(5,device=d)
+        self.full_speed_gate=FullSpeedGate(n,d)
+        self.clearance_reward=SwingClearance(n,d)
+        self.clearance_sums=torch.zeros(n,3,device=d)
         self.acceptance={'whole_body':False};self.stage1_pass_ema=0.;self.log_metrics={}
         self._trajectory_target()
 
-    def set_stage1_curriculum(self,level):
-        assert self.training_stage==1 and 0<=level<len(STAGE1_LEVELS)
-        self.stage1_curriculum_level=level
-        self.range_scale,self.guidance_cap_deg=STAGE1_LEVELS[level]
-        self.last_curriculum_change_iteration=self.training_iteration
-        self.reset()
-        # The old episodes must not contribute to the new curriculum gate.
-        self.success_ema=0.;self.precision_success_ema=0.;self.log_metrics={}
+    def configure_imitation_commands(self,amp):
+        self.imitation_commands.configure(amp.reference_frame_commands,amp.reference_frame_lengths,amp.clip_signatures)
+
+    def update_command_curriculum(self,iteration):
+        self.imitation_commands.fraction=omni_fraction(iteration)
+        self.full_speed_learned |= self.full_speed_gate.ready()
+        self.guidance_cap_deg=next_attitude_cap(self.guidance_cap_deg,self.success_ema,
+            self.full_speed_learned,self.imitation_commands.fraction)
 
     def set_training_stage(self,stage):
         assert stage in (1,2)
@@ -90,25 +115,16 @@ class DuetEnv(DualModeEnv):
     def _sample_base_commands(self,ids):
         super()._sample_base_commands(ids)
         if hasattr(self,'guidance_target'):
-            # Balanced explicit moving commands; zero remains a separate command.
-            caps=torch.tensor([1.,.6,.8],device=self.device)*self.range_scale
-            axis=torch.randint(0,3,(len(ids),),device=self.device)
-            c=torch.zeros(len(ids),3,device=self.device)
-            low=.5*caps
-            if self.cfg.directional_amp:low[1]=.12
-            magnitude=low[axis]+(caps[axis]-low[axis])*torch.rand(len(ids),device=self.device)
-            c[torch.arange(len(ids),device=self.device),axis]=magnitude*torch.where(torch.rand(len(ids),device=self.device)>.5,1.,-1.)
-            mixed=torch.rand(len(ids),device=self.device)<.25
-            c[mixed]+=(2*torch.rand(int(mixed.sum()),3,device=self.device)-1)*caps*.25
-            c=c.clamp(-caps,caps);c[torch.rand(len(ids),device=self.device)<.1]=0
-            c=apply_velocity_deadzone(c)
-            if self.cfg.directional_amp and hasattr(self,'amp_command_bank'):
-                scale, reference, signatures=self.amp_command_bank
-                guided=guide_mixed_targets(c/scale,caps/scale,reference,signatures)
-                if self.training_stage==1:
-                    guided=fallback_mixed_targets(guided,reference,signatures)
-                c=scale*guided
-            self.command_targets[ids,:3]=c;self.command_targets[ids,3]=0
+            if self.cfg.directional_amp:
+                if self.imitation_commands.reference is None:
+                    self.command_targets[ids,:3]=0
+                else:
+                    c,reference,free=self.imitation_commands.sample(ids,self.step_dt)
+                    self.command_targets[ids,:3]=c
+                    self.command_source_counts+=torch.stack(((~free).sum(),free.sum()))
+                self.command_age[ids]=0
+                self.command_period[ids]=IMITATION_COMMANDS['resample_s']
+            self.command_targets[ids,3]=0
             if self.training_stage==1:
                 cap=np.deg2rad(self.guidance_cap_deg)
                 self.guidance_target[ids]=(2*torch.rand(len(ids),2,device=self.device)-1)*cap
@@ -150,9 +166,10 @@ class DuetEnv(DualModeEnv):
     def _pre_physics_step(self,actions):
         # Preserve PPO's unclipped actions in its own buffer; clip at actuator interface.
         self.last_actions.copy_(self.actions);self.actions=actions.clamp(-1,1)
-        self.filtered+=.2*(self.actions-self.filtered)
+        self.filtered.copy_(filter_action(self.filtered,self.actions))
+        self.imitation_commands.advance(self.step_dt)
         self.command_age+=self.step_dt
-        ids=torch.where(self.command_age>self.command_period)[0]
+        ids=torch.where(self.command_age>=self.command_period-1e-5)[0]
         if len(ids):self._sample_base_commands(ids)
         self._advance_base_command()
         self.commands[:,3]=self.guidance[:,0]
@@ -232,7 +249,8 @@ class DuetEnv(DualModeEnv):
         tracking=tracking_error_objective(norm)+1.5*progress-2*stalled.float()
         posture=posture_objective(ep,self.roll_error)
         foot_position,foot_velocity=self.foot_kinematics()
-        foot_force=self.foot_contact_forces()
+        foot_normals=self.foot_contact_normals_w()
+        foot_force=foot_normals.norm(dim=-1)
         foot_clearance=foot_position[:,:,2]-self.scene.env_origins[:,None,2]-.022
         walking=(self.walk_blend>.8)&~self.bad_contact
         if self.cfg.phase_free_amp:
@@ -296,19 +314,57 @@ class DuetEnv(DualModeEnv):
         smooth-=100*overshoot.square().sum(-1)+.05*self.robot.data.joint_vel[:,self.arm].square().sum(-1)*settled[:,0]
         # Stage-one locomotion must preserve the folded arm while learning to walk.
         arm_hold_cost=4.*torch.log1p((ea/np.deg2rad(.5)).square().mean(-1)) if self.training_stage==1 else 0.
-        splay_cost=0.
+        splay_cost=0.;inner_style_cost=0.;positive_factor=1.
         if self.cfg.hip_splay_penalty:
-            splay_cost,hip_deg,hip_excess=hip_splay(self.robot.data.joint_pos[:,self.legs[::3]],self.commands)
-            self.hip_splay_stats+=torch.cat([hip_deg,hip_excess.float(),splay_cost[:,None]],dim=-1)
+            splay_cost,hip_deg,hip_excess,hip_inward,hip_aligned=hip_splay(
+                self.robot.data.joint_pos[:,self.legs[::3]],self.commands,self.actual_roll,include_inward=False)
+            inner_style_cost,_=inward_hip_cost(hip_aligned,self.commands)
+            self.hip_splay_stats+=torch.cat([hip_deg,hip_excess.float(),splay_cost[:,None],
+                hip_inward.float(),hip_aligned],dim=-1)
         self.loco_reward=(tracking+posture+gait_reward-arm_hold_cost-splay_cost+regular+collision+.2+(.2*task if self.training_stage==2 else 0))*self.step_dt
         if self.cfg.directional_amp:
-            move=(self.commands[:,:2].norm(dim=-1)>.06)&~self.bad_contact
-            bonus=self.air_time_reward.step(foot_contact,foot_clearance,move,self.step_dt)
+            move=self.commands[:,:3].ne(0.).any(dim=-1)&~self.bad_contact
+            bonus,touchdown=self.air_time_reward.step(foot_contact,foot_clearance,move,self.step_dt)
+            participation_cost,shares,ready=self.foot_participation.step(
+                foot_normals[:,:,2],foot_contact,touchdown,move,self.step_dt)
             height=self.robot.data.root_link_pos_w[:,2]-self.scene.env_origins[:,2]
             height_cost=low_base_cost(height)
-            self.loco_reward+=bonus-height_cost*self.step_dt
+            clearance_cost,clearance_weight,clearance_target=self.clearance_reward.step(
+                foot_contact,foot_clearance,foot_velocity,self.commands,move,self.step_dt)
+            self.clearance_sums+=torch.stack((clearance_cost,clearance_weight.sum(-1),
+                (clearance_weight*foot_clearance).sum(-1)),dim=-1)
+            Rroot=matrix_from_quat(self.robot.data.root_link_quat_w)
+            yaw=torch.atan2(Rroot[:,1,0],Rroot[:,0,0])
+            relative=foot_position-self.robot.data.root_link_pos_w[:,None,:]
+            heading_y=-yaw.sin()[:,None]*relative[:,:,0]+yaw.cos()[:,None]*relative[:,:,1]
+            width_cost,signed_y,narrow=stance_width_cost(heading_y,foot_contact,self.commands)
+            cadence_cost,cadence_hz,cadence_ready,cadence_fast=self.measured_cadence.step(
+                touchdown,self.commands,move,self.step_dt)
+            self.width_sums+=torch.stack((width_cost,narrow.sum(-1),foot_contact.sum(-1),
+                heading_y[:,0]-heading_y[:,1],heading_y[:,2]-heading_y[:,3]),dim=-1)
+            self.cadence_sums+=torch.cat((cadence_cost[:,None],cadence_hz*cadence_ready,
+                cadence_ready.float(),cadence_fast.float()),dim=-1)
+            self.loco_reward+=bonus-(height_cost+participation_cost+clearance_cost)*self.step_dt
+            standing_cost,standing_ready,standing_contact,standing_shares=self.standing_support.step(
+                self.commands,foot_clearance,foot_normals[:,:,2],self.step_dt)
+            sr=standing_ready.float()
+            self.standing_sums+=torch.cat((
+                (standing_cost*sr)[:,None],(standing_contact.all(-1)*sr)[:,None],sr[:,None],
+                foot_clearance*sr[:,None],standing_contact*sr[:,None],standing_shares*sr[:,None]),dim=-1)
+            positive_factor=style_reward_factor(inner_style_cost+width_cost+cadence_cost+standing_cost)
             self.air_time_sums+=bonus
             self.base_height_sums+=torch.stack((height<BASE_HEIGHT_SPEC["lower_band_m"],height_cost),dim=-1)
+            self.participation_sums+=torch.cat((shares*ready[:,None],touchdown,
+                participation_cost[:,None],ready[:,None]),dim=-1)
+            translating=self.commands[:,:2].ne(0.).any(dim=-1)&~self.bad_contact
+            gait_delta,switch,same_side,diagonal_cost=self.diagonal_support.step(foot_contact,translating,self.step_dt)
+            self.loco_reward+=gait_delta
+            self.diagonal_sums+=torch.stack((switch,same_side,diagonal_cost,translating),dim=-1)
+        self.raw_loco_shaping=self.loco_reward.clone()
+        if self.training_stage==1:self.loco_reward=stage1_reward(self.loco_reward,self.reset_terminated,positive_factor)
+        elif self.cfg.directional_amp:
+            self.loco_reward=torch.where(self.loco_reward>0,self.loco_reward*positive_factor,self.loco_reward)
+        self.style_positive_factor=positive_factor
         self.arm_reward=(task+posture+smooth+collision+.2*tracking)*self.step_dt
         self.steps+=1;self.roll_sums+=self.roll_error.square()
         self.sums+=torch.cat([ev.square(),ew.square()[:,None],ep.square()[:,None],ea.square(),self.bad_contact.float()[:,None],(head<.02).float()[:,None],self.tcp_pos_error.square()[:,None],self.tcp_rot_error.square()[:,None]],-1)
@@ -316,6 +372,7 @@ class DuetEnv(DualModeEnv):
         self.track_sums+=norm.square()*valid[:,None];self.track_counts+=valid.float()
         act=active&valid[:,None];gain=actual*self.commands[:,:3]/(self.commands[:,:3].square()+1e-8)
         self.gain_sums+=gain*act;self.active_counts+=act.float()
+        self.full_speed_gate.record(self.commands[:,:3],norm,gain,ep,self.roll_error,valid)
         self.exceed+=torch.cat([(ea.abs()>np.deg2rad(1)).float(),(self.tcp_pos_error>.02).float()[:,None],(self.tcp_rot_error>np.deg2rad(3)).float()[:,None]],-1)
         return self.loco_reward
 
@@ -323,7 +380,11 @@ class DuetEnv(DualModeEnv):
         if ids is None:ids=self.robot._ALL_INDICES
         if len(ids)==0:return
         if hasattr(self,'guidance'):
-            count=self.steps[ids].clamp_min(1);rmse=(self.sums[ids]/count[:,None]).sqrt();roll=(self.roll_sums[ids]/count).sqrt()
+            count=self.steps[ids].clamp_min(1)
+            self.rollout_health+=torch.stack((count.new_tensor(len(ids)),count.sum(),
+                self.reset_terminated[ids].sum(),(self.reset_time_outs[ids]&~self.reset_terminated[ids]).sum(),
+                self.calf_contact_seen[ids].sum())).to(self.rollout_health.dtype)
+            rmse=(self.sums[ids]/count[:,None]).sqrt();roll=(self.roll_sums[ids]/count).sqrt()
             normalized=(self.track_sums[ids]/self.track_counts[ids,None].clamp_min(1)).sqrt()
             gain=self.gain_sums[ids]/self.active_counts[ids].clamp_min(1)
             response=motion_gate(normalized,gain,self.active_counts[ids],self.track_counts[ids])
@@ -335,6 +396,16 @@ class DuetEnv(DualModeEnv):
             self.precision_success_ema=decay*self.precision_success_ema+(1-decay)*precision.float().mean().item()
             self.log_metrics={'vx_rmse':float(rmse[:,0].mean()),'vy_rmse':float(rmse[:,1].mean()),'wz_rmse':float(rmse[:,2].mean()),'pitch_rmse_deg':float(rmse[:,3].mean()*180/np.pi),'roll_rmse_deg':float(roll.mean()*180/np.pi),'tcp_rmse_m':float(rmse[:,12].mean()),'episode_steps':float(count.mean()),'response_pass_fraction':float(response.float().mean()),'contact_fraction':float((self.sums[ids,10]>0).float().mean()),'directional_gain':float(gain[self.active_counts[ids]>=50].mean()) if (self.active_counts[ids]>=50).any() else 0.}
             self.log_metrics.update(gate_complete_fraction=float(complete.float().mean()),gate_contact_free_fraction=float((self.sums[ids,10:12]==0).all(-1).float().mean()),gate_posture_pass_fraction=float(((rmse[:,3]<np.deg2rad(3))&(roll<np.deg2rad(3))).float().mean()),gate_pass_fraction=float(passed.float().mean()))
+            self.full_speed_gate.finish(ids,complete&(self.sums[ids,10:12]==0).all(-1))
+            self.log_metrics.update(self.full_speed_gate.metrics())
+            self.log_metrics.update(command_omni_fraction=self.imitation_commands.fraction,
+                command_expert_sample_count=int(self.command_source_counts[0]),command_omni_sample_count=int(self.command_source_counts[1]),
+                full_speed_learned=self.full_speed_learned,guidance_cap_deg=self.guidance_cap_deg)
+            clearance=self.clearance_sums[ids].sum(0)
+            self.log_metrics.update(swing_clearance_cost_mean=float(clearance[0]/count.sum().clamp_min(1)),
+                swing_clearance_weighted_height_m=float(clearance[2]/clearance[1].clamp_min(1)),
+                swing_clearance_weight_samples=float(clearance[1]))
+            self.clearance_sums[ids]=0;self.clearance_reward.reset(ids)
             self.log_metrics['calf_contact_episode_fraction']=float(self.calf_contact_seen[ids].float().mean())
             self.log_metrics.update(physical_termination_fraction=float(self.reset_terminated[ids].float().mean()),timeout_fraction=float(self.reset_time_outs[ids].float().mean()))
             foot=self.foot_stats[ids].sum(0)
@@ -363,21 +434,61 @@ class DuetEnv(DualModeEnv):
                 for j,leg in enumerate(('fl','fr','rl','rr')):
                     self.log_metrics[f'{leg}_hip_outward_mean_deg']=hip[j]
                     self.log_metrics[f'{leg}_hip_excess_fraction']=hip[4+j]
+                    self.log_metrics[f'{leg}_hip_inward_excess_fraction']=hip[9+j]
+                    self.log_metrics[f'{leg}_hip_gravity_aligned_mean_deg']=hip[13+j]
                 self.log_metrics['hip_splay_cost_mean']=hip[8]
                 self.hip_splay_stats[ids]=0
             if self.cfg.directional_amp:
+                width=self.width_sums[ids].sum(0);cadence=self.cadence_sums[ids].sum(0)
+                self.log_metrics.update(stance_width_cost_mean=float(width[0]/count.sum().clamp_min(1)),
+                    stance_narrow_contact_fraction=float(width[1]/width[2].clamp_min(1)),
+                    front_stance_width_mean_m=float(width[3]/count.sum().clamp_min(1)),
+                    rear_stance_width_mean_m=float(width[4]/count.sum().clamp_min(1)),
+                    cadence_cost_mean=float(cadence[0]/count.sum().clamp_min(1)))
+                for j,leg in enumerate(('fl','fr','rl','rr')):
+                    self.log_metrics[f'{leg}_measured_cadence_hz']=float(cadence[1+j]/cadence[5+j].clamp_min(1))
+                    self.log_metrics[f'{leg}_cadence_ready_samples']=int(cadence[5+j])
+                    self.log_metrics[f'{leg}_cadence_excess_fraction']=float(cadence[9+j]/cadence[5+j].clamp_min(1))
+                self.width_sums[ids]=0;self.cadence_sums[ids]=0;self.measured_cadence.reset(ids)
                 self.log_metrics['air_time_reward_per_step']=float(self.air_time_sums[ids].sum()/count.sum().clamp_min(1))
                 height_stats=(self.base_height_sums[ids].sum(0)/count.sum().clamp_min(1)).tolist()
                 self.log_metrics.update(root_below_28p5cm_fraction=height_stats[0],root_height_cost_mean=height_stats[1])
                 self.base_height_sums[ids]=0
                 self.air_time_sums[ids]=0
                 self.air_time_reward.reset(ids)
+                participation=self.participation_sums[ids].sum(0)
+                samples=participation[9].clamp_min(1.)
+                self.log_metrics.update(foot_participation_samples=int(participation[9]),
+                    foot_participation_cost_mean=float(participation[8]/samples))
+                for j,leg in enumerate(('fl','fr','rl','rr')):
+                    self.log_metrics[f'{leg}_normal_load_share']=float(participation[j]/samples)
+                    self.log_metrics[f'{leg}_qualified_touchdowns']=int(participation[4+j])
+                self.participation_sums[ids]=0
+                self.foot_participation.reset(ids)
+                diagonal=self.diagonal_sums[ids].sum(0)
+                gait_samples=diagonal[3].clamp_min(1.)
+                self.log_metrics.update(diagonal_switches_per_s=float(diagonal[0]/(gait_samples*self.step_dt)),
+                    same_side_support_fraction=float(diagonal[1]/gait_samples),
+                    diagonal_alternation_cost_mean=float(diagonal[2]/gait_samples),
+                    diagonal_translation_samples=int(diagonal[3]))
+                self.diagonal_sums[ids]=0
+                self.diagonal_support.reset(ids)
+                standing=self.standing_sums[ids].sum(0);stand_samples=standing[2].clamp_min(1.)
+                self.log_metrics.update(standing_support_samples=int(standing[2]),
+                    standing_support_cost_mean=float(standing[0]/stand_samples),
+                    standing_all_four_contact_fraction=float(standing[1]/stand_samples))
+                for j,leg in enumerate(('fl','fr','rl','rr')):
+                    self.log_metrics[f'{leg}_standing_clearance_mean_m']=float(standing[3+j]/stand_samples)
+                    self.log_metrics[f'{leg}_standing_contact_fraction']=float(standing[7+j]/stand_samples)
+                    self.log_metrics[f'{leg}_standing_load_share']=float(standing[11+j]/stand_samples)
+                self.standing_sums[ids]=0;self.standing_support.reset(ids)
             self.extras['log']=self.log_metrics
         self.robot.reset(ids);DirectRLEnv._reset_idx(self,ids)
         self.calf_contact_seen[ids]=False
         root=self.robot.data.default_root_state[ids].clone();root[:,:3]+=self.scene.env_origins[ids]
         self.robot.write_root_pose_to_sim(root[:,:7],ids);self.robot.write_root_velocity_to_sim(root[:,7:],ids)
         self.robot.write_joint_state_to_sim(self.nominal[ids],torch.zeros_like(self.nominal[ids]),env_ids=ids)
+        self.imitation_commands.reset(ids)
         self._choose_path(ids);self._sample_base_commands(ids)
         for b in [self.actions,self.last_actions,self.filtered,self.commands,self.base_slew,self.obs_history,self.sums,self.steps,self.exceed,self.track_sums,self.track_counts,self.gain_sums,self.active_counts,self.last_goal_sign,self.goal_crossings]:b[ids]=0
         # Articulation.reset() clears actuator internals but leaves the effort target buffer.

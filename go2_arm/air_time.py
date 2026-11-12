@@ -2,13 +2,13 @@
 import torch
 
 AIR_TIME_REWARD = {
-    "revision": "measured_swing_touchdown_v1",
+    "revision": "measured_swing_touchdown_v2",
     "minimum_swing_s": .08,
     "full_swing_s": .18,
     "minimum_clearance_m": .015,
     "full_clearance_m": .04,
-    "per_foot_max": .006,
-    "per_step_max": .012,
+    "per_foot_max": .009,
+    "per_step_max": .018,
 }
 
 
@@ -33,10 +33,11 @@ class AirTimeReward:
                     (cfg["full_swing_s"] - cfg["minimum_swing_s"])).clamp(0., 1.)
         lift = ((self.height - cfg["minimum_clearance_m"]) /
                 (cfg["full_clearance_m"] - cfg["minimum_clearance_m"])).clamp(0., 1.)
+        qualified_touchdown = touchdown & (duration > 0.) & (lift > 0.)
         bonus = (cfg["per_foot_max"] * (duration * lift * touchdown).sum(dim=-1)).clamp_max(cfg["per_step_max"])
         self.seen_contact |= contact
         swing = active & ~contact & self.seen_contact
         self.time.copy_(torch.where(swing, (self.time + dt).clamp_max(cfg["full_swing_s"]), 0.))
         self.height.copy_(torch.where(swing, torch.maximum(self.height, clearance), 0.))
         self.had_support.copy_(swing & (self.had_support | contact.any(dim=-1, keepdim=True)))
-        return bonus
+        return bonus, qualified_touchdown

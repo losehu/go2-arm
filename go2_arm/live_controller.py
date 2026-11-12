@@ -69,6 +69,8 @@ try:
  cfg.directional_amp=saved.get('manifest',{}).get('directional_amp',False)
  cfg.robot.init_state.joint_pos.update(dict(zip(JOINT_NAMES,PREVIEW_DEFAULT_Q[7:].tolist())))
  env=LiveEnv(cfg);env.reset()
+ from leg_action import LEG_ACTION_CONTROL
+ if saved['manifest'].get('leg_action_controller')!=LEG_ACTION_CONTROL:raise ValueError('Checkpoint/controller mismatch; use the matching source package')
  if saved.get('format')!='roboduet_dualmode_v1':raise ValueError('This worker requires a new dual-policy checkpoint')
  env.training_stage=saved['training_stage'];env.level=saved['arm_level'];env.range_scale=saved['range_scale'];env.arm_enabled[:]=env.training_stage==2;env.init_live()
  loco=make_ppo(observations(env.get_loco_observation()),12,args.device);arm=make_ppo(observations(env.get_arm_observation()),8,args.device)

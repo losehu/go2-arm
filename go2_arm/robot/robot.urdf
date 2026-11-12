@@ -1,0 +1,1656 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="go2_piper_folded_box_supported">
+  <mujoco>
+    <compiler meshdir="assets" discardvisual="false" fusestatic="false" />
+  </mujoco>
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0.021112 0 -0.005366" rpy="-2.964932233 -1.552525859 -0.1783493718" />
+      <mass value="6.921" />
+      <inertia ixx="0.107027" iyy="0.0980771" izz="0.0244531" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="base_link_visual_0">
+      <origin xyz="0.2925517035 -0.0002590740272 -0.06178330887" rpy="-1.577880751 -1.309022105 -3.134271161" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_0.stl" />
+      </geometry>
+      <material name="material_0">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <visual name="base_link_visual_1">
+      <origin xyz="0.2918599351 -0.0002121566502 -0.05920206067" rpy="-1.573115907 -1.308991988 -3.139186915" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_1.stl" />
+      </geometry>
+      <material name="material_1">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <visual name="base_link_visual_2">
+      <origin xyz="0.3259808518 -0.0002316799582 0.03263958907" rpy="0.000248247246 -0.04749415778 -0.0001120395472" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_2.stl" />
+      </geometry>
+      <material name="material_2">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <visual name="base_link_visual_3">
+      <origin xyz="0.0581707486 0.007873205643 0.03203657818" rpy="0.5193129231 -1.554545409 2.636681818" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_3.stl" />
+      </geometry>
+      <material name="material_3">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <visual name="base_link_visual_4">
+      <origin xyz="0.07740924528 -0.0005989089609 -0.0007924309884" rpy="-0.2677341521 -1.52126378 -2.877117855" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_4.stl" />
+      </geometry>
+      <material name="material_4">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <collision name="base_link_collision_5">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3762 0.0935 0.114" />
+      </geometry>
+    </collision>
+    <collision name="base_link_collision_6">
+      <origin xyz="0.285 0 0.01" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.05" length="0.09" />
+      </geometry>
+    </collision>
+    <collision name="base_link_collision_7">
+      <origin xyz="0.293 0 -0.06" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.047" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="FL_hip">
+    <inertial>
+      <origin xyz="-0.0054 0.00194 -0.000105" rpy="1.58027096 0.004958737006 1.57825994" />
+      <mass value="0.678" />
+      <inertia ixx="0.00088403" iyy="0.000596003" izz="0.000479967" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="FL_hip_visual_8">
+      <origin xyz="-0.01843071038 -0.004032848175 -9.402321169e-05" rpy="1.574010546 0.0004861915143 1.518289669" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_5.stl" />
+      </geometry>
+      <material name="material_8">
+        <color rgba="0.8999999762 0.9499999881 0.9499999881 1" />
+      </material>
+    </visual>
+    <visual name="FL_hip_visual_9">
+      <origin xyz="-0.01634541557 0.009974776861 -0.0001524228331" rpy="1.572210795 -7.147460598e-05 1.940607086" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_6.stl" />
+      </geometry>
+      <material name="material_9">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <collision name="FL_hip_collision_10">
+      <origin xyz="0 0.08 0" rpy="1.570796327 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.04" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FL_hip_joint" type="revolute">
+    <origin xyz="0.1934 0.0465 0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="FL_hip" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.0472" upper="1.0472" effort="23.7" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="FL_thigh">
+    <inertial>
+      <origin xyz="-0.00374 -0.0223 -0.0327" rpy="0.1197437566 -0.1271434035 1.166036578" />
+      <mass value="1.152" />
+      <inertia ixx="0.00594973" iyy="0.00584149" izz="0.000878787" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="FL_thigh_visual_11">
+      <origin xyz="-0.004160916923 -0.01665529031 -0.04174767473" rpy="0.07764100422 -0.1280298994 1.453586118" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_7.stl" />
+      </geometry>
+      <material name="material_11">
+        <color rgba="0.8999999762 0.9499999881 0.9499999881 1" />
+      </material>
+    </visual>
+    <visual name="FL_thigh_visual_12">
+      <origin xyz="-0.005054061148 -0.02186542663 0.01013743305" rpy="-2.113089478 -0.7604710561 -2.106794152" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_8.stl" />
+      </geometry>
+      <material name="material_12">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <collision name="FL_thigh_collision_13">
+      <origin xyz="0 0 -0.1065" rpy="-0 1.570796327 0" />
+      <geometry>
+        <box size="0.213 0.0245 0.034" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FL_thigh_joint" type="revolute">
+    <origin xyz="0 0.0955 0" rpy="0 0 0" />
+    <parent link="FL_hip" />
+    <child link="FL_thigh" />
+    <axis xyz="0 1 0" />
+    <limit lower="-1.5708" upper="3.4907" effort="23.7" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="FL_calf">
+    <inertial>
+      <origin xyz="0.00629595 -0.000622121 -0.141417" rpy="-0.004142679595 -0.008565579786 1.560682489" />
+      <mass value="0.241352" />
+      <inertia ixx="0.0014901" iyy="0.00146356" izz="5.31397e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="FL_calf_visual_14">
+      <origin xyz="0.007579670793 -8.678211118e-05 -0.1264626334" rpy="-0.04052234942 -0.001996311439 1.588013639" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_11.stl" />
+      </geometry>
+      <material name="material_14">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <visual name="FL_calf_visual_15">
+      <origin xyz="-0.005532025748 0.0002013131232 -0.2184505817" rpy="-3.141574446 -1.00952398 -0.000281900717" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_12.stl" />
+      </geometry>
+      <material name="material_15">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision name="FL_calf_collision_16">
+      <origin xyz="0.008 0 -0.06" rpy="0 -0.2099995725 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.12" />
+      </geometry>
+    </collision>
+    <collision name="FL_calf_collision_17">
+      <origin xyz="0.02 0 -0.148" rpy="0 0.04999998398 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.065" />
+      </geometry>
+    </collision>
+    <visual name="FL_calf_visual_18">
+      <origin xyz="-0.00564688299 2.787544104e-05 -0.2184697627" rpy="3.141084763 -1.009081396 0.0002197022201" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_15.stl" />
+      </geometry>
+      <material name="material_18">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision name="FL_calf_collision_19">
+      <origin xyz="-0.002 0 -0.213" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FL_calf_joint" type="revolute">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="FL_thigh" />
+    <child link="FL_calf" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.7227" upper="-0.83776" effort="45.43" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="FL_foot" />
+  <joint name="FL_foot_fixed_joint" type="fixed">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="FL_calf" />
+    <child link="FL_foot" />
+  </joint>
+  <link name="FR_hip">
+    <inertial>
+      <origin xyz="-0.0054 -0.00194 -0.000105" rpy="1.58027096 -0.004958737006 1.563332714" />
+      <mass value="0.678" />
+      <inertia ixx="0.00088403" iyy="0.000596003" izz="0.000479967" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="FR_hip_visual_20">
+      <origin xyz="-0.01843071038 0.004032856869 9.364955338e-05" rpy="-1.56758697 -0.000578717423 -1.518289666" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_5.stl" />
+      </geometry>
+      <material name="material_20">
+        <color rgba="0.8999999762 0.9499999881 0.9499999881 1" />
+      </material>
+    </visual>
+    <visual name="FR_hip_visual_21">
+      <origin xyz="-0.01634541557 -0.009974762696 0.0001533470315" rpy="-1.56934837 -1.491521788e-05 -1.940607085" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_6.stl" />
+      </geometry>
+      <material name="material_21">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <collision name="FR_hip_collision_22">
+      <origin xyz="0 -0.08 0" rpy="1.570796327 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.04" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FR_hip_joint" type="revolute">
+    <origin xyz="0.1934 -0.0465 0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="FR_hip" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.0472" upper="1.0472" effort="23.7" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="FR_thigh">
+    <inertial>
+      <origin xyz="-0.00374 0.0223 -0.0327" rpy="0.1197437566 0.1271434035 1.975556076" />
+      <mass value="1.152" />
+      <inertia ixx="0.00594973" iyy="0.00584149" izz="0.000878787" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="FR_thigh_visual_23">
+      <origin xyz="-0.004160916339 0.01665529142 -0.0417476469" rpy="0.07764122077 0.1280299546 1.68800637" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_9.stl" />
+      </geometry>
+      <material name="material_23">
+        <color rgba="0.8999999762 0.9499999881 0.9499999881 1" />
+      </material>
+    </visual>
+    <visual name="FR_thigh_visual_24">
+      <origin xyz="-0.005054066983 0.02186545408 0.01013752728" rpy="-1.028532776 -0.7604730772 2.1068036" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_10.stl" />
+      </geometry>
+      <material name="material_24">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <collision name="FR_thigh_collision_25">
+      <origin xyz="0 0 -0.1065" rpy="-0 1.570796327 0" />
+      <geometry>
+        <box size="0.213 0.0245 0.034" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FR_thigh_joint" type="revolute">
+    <origin xyz="0 -0.0955 0" rpy="0 0 0" />
+    <parent link="FR_hip" />
+    <child link="FR_thigh" />
+    <axis xyz="0 1 0" />
+    <limit lower="-1.5708" upper="3.4907" effort="23.7" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="FR_calf">
+    <inertial>
+      <origin xyz="0.00629595 0.000622121 -0.141417" rpy="-0.004142679595 0.008565579786 1.580910164" />
+      <mass value="0.241352" />
+      <inertia ixx="0.0014901" iyy="0.00146356" izz="5.31397e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="FR_calf_visual_26">
+      <origin xyz="0.007579674924 8.678093902e-05 -0.126462635" rpy="-0.04052236622 0.001996318394 1.55357891" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_13.stl" />
+      </geometry>
+      <material name="material_26">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <visual name="FR_calf_visual_27">
+      <origin xyz="-0.00553201263 -0.0002013131062 -0.2184505842" rpy="3.141584662 -1.009524468 0.0002794474351" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_14.stl" />
+      </geometry>
+      <material name="material_27">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision name="FR_calf_collision_28">
+      <origin xyz="0.01 0 -0.06" rpy="0 -0.1999999999 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.12" />
+      </geometry>
+    </collision>
+    <collision name="FR_calf_collision_29">
+      <origin xyz="0.02 0 -0.148" rpy="0 0.04999998398 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.065" />
+      </geometry>
+    </collision>
+    <visual name="FR_calf_visual_30">
+      <origin xyz="-0.00564688299 2.787544104e-05 -0.2184697627" rpy="3.141084763 -1.009081396 0.0002197022201" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_15.stl" />
+      </geometry>
+      <material name="material_30">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision name="FR_calf_collision_31">
+      <origin xyz="-0.002 0 -0.213" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="FR_calf_joint" type="revolute">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="FR_thigh" />
+    <child link="FR_calf" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.7227" upper="-0.83776" effort="45.43" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="FR_foot" />
+  <joint name="FR_foot_fixed_joint" type="fixed">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="FR_calf" />
+    <child link="FR_foot" />
+  </joint>
+  <link name="RL_hip">
+    <inertial>
+      <origin xyz="0.0054 0.00194 -0.000105" rpy="1.561321694 0.004958737006 1.563332714" />
+      <mass value="0.678" />
+      <inertia ixx="0.00088403" iyy="0.000596003" izz="0.000479967" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="RL_hip_visual_32">
+      <origin xyz="0.01843070159 -0.004032848175 9.573088295e-05" rpy="-1.567674633 -0.0004813288165 1.62330303" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_5.stl" />
+      </geometry>
+      <material name="material_32">
+        <color rgba="0.8999999762 0.9499999881 0.9499999881 1" />
+      </material>
+    </visual>
+    <visual name="RL_hip_visual_33">
+      <origin xyz="0.01634540137 0.009974776861 0.0001539372941" rpy="-1.569468248 3.798598206e-05 1.200985563" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_6.stl" />
+      </geometry>
+      <material name="material_33">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <collision name="RL_hip_collision_34">
+      <origin xyz="0 0.08 0" rpy="1.570796327 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.04" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RL_hip_joint" type="revolute">
+    <origin xyz="-0.1934 0.0465 0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="RL_hip" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.0472" upper="1.0472" effort="23.7" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="RL_thigh">
+    <inertial>
+      <origin xyz="-0.00374 -0.0223 -0.0327" rpy="0.1197437566 -0.1271434035 1.166036578" />
+      <mass value="1.152" />
+      <inertia ixx="0.00594973" iyy="0.00584149" izz="0.000878787" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="RL_thigh_visual_35">
+      <origin xyz="-0.004160916923 -0.01665529031 -0.04174767473" rpy="0.07764100422 -0.1280298994 1.453586118" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_7.stl" />
+      </geometry>
+      <material name="material_35">
+        <color rgba="0.8999999762 0.9499999881 0.9499999881 1" />
+      </material>
+    </visual>
+    <visual name="RL_thigh_visual_36">
+      <origin xyz="-0.005054061148 -0.02186542663 0.01013743305" rpy="-2.113089478 -0.7604710561 -2.106794152" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_8.stl" />
+      </geometry>
+      <material name="material_36">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <collision name="RL_thigh_collision_37">
+      <origin xyz="0 0 -0.1065" rpy="-0 1.570796327 0" />
+      <geometry>
+        <box size="0.213 0.0245 0.034" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RL_thigh_joint" type="revolute">
+    <origin xyz="0 0.0955 0" rpy="0 0 0" />
+    <parent link="RL_hip" />
+    <child link="RL_thigh" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.5236" upper="4.5379" effort="23.7" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="RL_calf">
+    <inertial>
+      <origin xyz="0.00629595 -0.000622121 -0.141417" rpy="-0.004142679595 -0.008565579786 1.560682489" />
+      <mass value="0.241352" />
+      <inertia ixx="0.0014901" iyy="0.00146356" izz="5.31397e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="RL_calf_visual_38">
+      <origin xyz="0.007579670793 -8.678211118e-05 -0.1264626334" rpy="-0.04052234942 -0.001996311439 1.588013639" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_11.stl" />
+      </geometry>
+      <material name="material_38">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <visual name="RL_calf_visual_39">
+      <origin xyz="-0.005532025748 0.0002013131232 -0.2184505817" rpy="-3.141574446 -1.00952398 -0.000281900717" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_12.stl" />
+      </geometry>
+      <material name="material_39">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision name="RL_calf_collision_40">
+      <origin xyz="0.01 0 -0.06" rpy="0 -0.1999999999 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.12" />
+      </geometry>
+    </collision>
+    <collision name="RL_calf_collision_41">
+      <origin xyz="0.02 0 -0.148" rpy="0 0.04999998398 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.065" />
+      </geometry>
+    </collision>
+    <visual name="RL_calf_visual_42">
+      <origin xyz="-0.00564688299 2.787544104e-05 -0.2184697627" rpy="3.141084763 -1.009081396 0.0002197022201" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_15.stl" />
+      </geometry>
+      <material name="material_42">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision name="RL_calf_collision_43">
+      <origin xyz="-0.002 0 -0.213" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RL_calf_joint" type="revolute">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="RL_thigh" />
+    <child link="RL_calf" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.7227" upper="-0.83776" effort="45.43" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="RL_foot" />
+  <joint name="RL_foot_fixed_joint" type="fixed">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="RL_calf" />
+    <child link="RL_foot" />
+  </joint>
+  <link name="RR_hip">
+    <inertial>
+      <origin xyz="0.0054 -0.00194 -0.000105" rpy="1.561321694 -0.004958737006 1.57825994" />
+      <mass value="0.678" />
+      <inertia ixx="0.00088403" iyy="0.000596003" izz="0.000479967" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="RR_hip_visual_44">
+      <origin xyz="0.01843071898 0.004032856869 -9.194188132e-05" rpy="1.57409821 0.0005835801165 -1.623302934" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_5.stl" />
+      </geometry>
+      <material name="material_44">
+        <color rgba="0.8999999762 0.9499999881 0.9499999881 1" />
+      </material>
+    </visual>
+    <visual name="RR_hip_visual_45">
+      <origin xyz="0.0163454297 -0.009974762696 -0.0001518325692" rpy="1.572330674 -1.857340575e-05 -1.200985569" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_6.stl" />
+      </geometry>
+      <material name="material_45">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <collision name="RR_hip_collision_46">
+      <origin xyz="0 -0.08 0" rpy="1.570796327 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.04" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RR_hip_joint" type="revolute">
+    <origin xyz="-0.1934 -0.0465 0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="RR_hip" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.0472" upper="1.0472" effort="23.7" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="RR_thigh">
+    <inertial>
+      <origin xyz="-0.00374 0.0223 -0.0327" rpy="0.1197437566 0.1271434035 1.975556076" />
+      <mass value="1.152" />
+      <inertia ixx="0.00594973" iyy="0.00584149" izz="0.000878787" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="RR_thigh_visual_47">
+      <origin xyz="-0.004160916339 0.01665529142 -0.0417476469" rpy="0.07764122077 0.1280299546 1.68800637" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_9.stl" />
+      </geometry>
+      <material name="material_47">
+        <color rgba="0.8999999762 0.9499999881 0.9499999881 1" />
+      </material>
+    </visual>
+    <visual name="RR_thigh_visual_48">
+      <origin xyz="-0.005054066983 0.02186545408 0.01013752728" rpy="-1.028532776 -0.7604730772 2.1068036" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_10.stl" />
+      </geometry>
+      <material name="material_48">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <collision name="RR_thigh_collision_49">
+      <origin xyz="0 0 -0.1065" rpy="-0 1.570796327 0" />
+      <geometry>
+        <box size="0.213 0.0245 0.034" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RR_thigh_joint" type="revolute">
+    <origin xyz="0 -0.0955 0" rpy="0 0 0" />
+    <parent link="RR_hip" />
+    <child link="RR_thigh" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.5236" upper="4.5379" effort="23.7" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="RR_calf">
+    <inertial>
+      <origin xyz="0.00629595 0.000622121 -0.141417" rpy="-0.004142679595 0.008565579786 1.580910164" />
+      <mass value="0.241352" />
+      <inertia ixx="0.0014901" iyy="0.00146356" izz="5.31397e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="RR_calf_visual_50">
+      <origin xyz="0.007579674924 8.678093902e-05 -0.126462635" rpy="-0.04052236622 0.001996318394 1.55357891" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_13.stl" />
+      </geometry>
+      <material name="material_50">
+        <color rgba="0.6717050076 0.6924260259 0.7742699981 1" />
+      </material>
+    </visual>
+    <visual name="RR_calf_visual_51">
+      <origin xyz="-0.00553201263 -0.0002013131062 -0.2184505842" rpy="3.141584662 -1.009524468 0.0002794474351" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_14.stl" />
+      </geometry>
+      <material name="material_51">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision name="RR_calf_collision_52">
+      <origin xyz="0.01 0 -0.06" rpy="0 -0.1999999999 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.12" />
+      </geometry>
+    </collision>
+    <collision name="RR_calf_collision_53">
+      <origin xyz="0.02 0 -0.148" rpy="0 0.04999998398 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.065" />
+      </geometry>
+    </collision>
+    <visual name="RR_calf_visual_54">
+      <origin xyz="-0.00564688299 2.787544104e-05 -0.2184697627" rpy="3.141084763 -1.009081396 0.0002197022201" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_15.stl" />
+      </geometry>
+      <material name="material_54">
+        <color rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision name="RR_calf_collision_55">
+      <origin xyz="-0.002 0 -0.213" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RR_calf_joint" type="revolute">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="RR_thigh" />
+    <child link="RR_calf" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.7227" upper="-0.83776" effort="45.43" velocity="30" />
+    <dynamics damping="0.1" friction="0.2" />
+  </joint>
+  <link name="RR_foot" />
+  <joint name="RR_foot_fixed_joint" type="fixed">
+    <origin xyz="0 0 -0.213" rpy="0 0 0" />
+    <parent link="RR_calf" />
+    <child link="RR_foot" />
+  </joint>
+  <link name="Piper">
+    <inertial>
+      <origin xyz="-0.00979274766 1.829058276e-06 0.04101001264" rpy="-0.391907893 -9.567657983e-05 1.572504533" />
+      <mass value="0.1625485674036938" />
+      <inertia ixx="0.0002694448987190872" iyy="0.00022747813755997652" izz="0.0002214369196861669" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="Piper_visual_56">
+      <origin xyz="-0.009278127611 -2.735929985e-06 0.03983125862" rpy="1.357717303 0.0003348596939 1.571092081" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_16.stl" />
+      </geometry>
+      <material name="material_56">
+        <color rgba="0.7921569943 0.8196079731 0.9333329797 1" />
+      </material>
+    </visual>
+    <collision name="Piper_collision_56">
+      <origin xyz="-0.009278127611 -2.735929985e-06 0.03983125862" rpy="1.357717303 0.0003348596939 1.571092081" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_16.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="Piper_fixed_joint" type="fixed">
+    <origin xyz=".20 0 .06" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="Piper" />
+  </joint>
+  <link name="link1">
+    <inertial>
+      <origin xyz="0.000121505 0.000104632 -0.00438597" rpy="1.6397574 0.04512936114 -0.002965429316" />
+      <mass value="0.71" />
+      <inertia ixx="0.000489262" iyy="0.000439887" izz="0.000404551" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="link1_visual_57">
+      <origin xyz="-0.0006705798261 -0.001005313827 -0.008251549778" rpy="1.506695309 0.1307647462 -0.004723829566" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_17.stl" />
+      </geometry>
+      <material name="material_57">
+        <color rgba="0.7921569943 0.8196079731 0.9333329797 1" />
+      </material>
+    </visual>
+    <collision name="link1_collision_57">
+      <origin xyz="-0.0006705798261 -0.001005313827 -0.008251549778" rpy="1.506695309 0.1307647462 -0.004723829566" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_17.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint1" type="revolute">
+    <origin xyz="0 0 0.123" rpy="0 0 0" />
+    <parent link="Piper" />
+    <child link="link1" />
+    <axis xyz="0 0 1" />
+    <limit lower="-2.618" upper="2.168" effort="20.0" velocity="3" />
+    <dynamics damping="1.0" friction="0.2" />
+  </joint>
+  <link name="link2">
+    <inertial>
+      <origin xyz="0.198666 -0.0109269 0.00142122" rpy="1.574576754 0.07186182921 1.598039607" />
+      <mass value="1.17" />
+      <inertia ixx="0.0679032" iyy="0.067745" izz="0.00111966" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="link2_visual_58">
+      <origin xyz="0.1643813407 -0.01375715468 0.0005389471431" rpy="1.573896329 0.01144199687 1.552809321" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_18.stl" />
+      </geometry>
+      <material name="material_58">
+        <color rgba="0.7921569943 0.8196079731 0.9333329797 1" />
+      </material>
+    </visual>
+    <collision name="link2_collision_58">
+      <origin xyz="0.1643813407 -0.01375715468 0.0005389471431" rpy="1.573896329 0.01144199687 1.552809321" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_18.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint2" type="revolute">
+    <origin xyz="0 0 0" rpy="1.570799532 -0.1009499983 3.14158527" />
+    <parent link="link1" />
+    <child link="link2" />
+    <axis xyz="0 0 1" />
+    <limit lower="0.0" upper="3.14" effort="20.0" velocity="3" />
+    <dynamics damping="1.0" friction="0.2" />
+  </joint>
+  <link name="link3">
+    <inertial>
+      <origin xyz="-0.0202738 -0.133915 -0.000458683" rpy="1.570824096 0.02731810494 0.1233524936" />
+      <mass value="0.5" />
+      <inertia ixx="0.0138227" iyy="0.0138032" izz="0.000244685" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="link3_visual_59">
+      <origin xyz="-0.01937722663 -0.1078338413 -0.0004063113522" rpy="1.561261264 -0.02320554209 -0.07370813709" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_19.stl" />
+      </geometry>
+      <material name="material_59">
+        <color rgba="0.7921569943 0.8196079731 0.9333329797 1" />
+      </material>
+    </visual>
+    <collision name="link3_collision_59">
+      <origin xyz="-0.01937722663 -0.1078338413 -0.0004063113522" rpy="1.561261264 -0.02320554209 -0.07370813709" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_19.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint3" type="revolute">
+    <origin xyz="0.28503 0 0" rpy="0 0 -1.759000405" />
+    <parent link="link2" />
+    <child link="link3" />
+    <axis xyz="0 0 1" />
+    <limit lower="-2.967" upper="0.0" effort="15.0" velocity="3" />
+    <dynamics damping="1.0" friction="0.2" />
+  </joint>
+  <link name="link4">
+    <inertial>
+      <origin xyz="-9.66636e-05 0.000876064 -0.00496881" rpy="-0.04914764967 0.2235578306 1.53022261" />
+      <mass value="0.38" />
+      <inertia ixx="0.000191586" iyy="0.000185052" izz="0.000152863" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="link4_visual_60">
+      <origin xyz="-0.0006285443353 0.006176698283 -0.008451435253" rpy="-0.4517608665 0.1252929125 -0.01393687908" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_20.stl" />
+      </geometry>
+      <material name="material_60">
+        <color rgba="0.7921569943 0.8196079731 0.9333329797 1" />
+      </material>
+    </visual>
+    <collision name="link4_collision_60">
+      <origin xyz="-0.0006285443353 0.006176698283 -0.008451435253" rpy="-0.4517608665 0.1252929125 -0.01393687908" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_20.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint4" type="revolute">
+    <origin xyz="-0.021984 -0.25075 0" rpy="1.570800569 0 0" />
+    <parent link="link3" />
+    <child link="link4" />
+    <axis xyz="0 0 1" />
+    <limit lower="-1.745" upper="1.745" effort="7.0" velocity="3" />
+    <dynamics damping="1.0" friction="0.2" />
+  </joint>
+  <link name="link5">
+    <inertial>
+      <origin xyz="-4.10554e-05 -0.0566487 -0.00372058" rpy="1.563760618 0.003779828761 1.437940816e-05" />
+      <mass value="0.383" />
+      <inertia ixx="0.00166169" iyy="0.00164328" izz="0.000185028" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="link5_visual_61">
+      <origin xyz="-0.0001398641988 -0.04353497626 -0.006457170515" rpy="0.3693320889 -1.122934911 1.16900923" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_21.stl" />
+      </geometry>
+      <material name="material_61">
+        <color rgba="0.7921569943 0.8196079731 0.9333329797 1" />
+      </material>
+    </visual>
+    <collision name="link5_collision_61">
+      <origin xyz="-0.0001398641988 -0.04353497626 -0.006457170515" rpy="0.3693320889 -1.122934911 1.16900923" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_21.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint5" type="revolute">
+    <origin xyz="0 0 0" rpy="-1.570800569 0 0" />
+    <parent link="link4" />
+    <child link="link5" />
+    <axis xyz="0 0 1" />
+    <limit lower="-1.22" upper="1.22" effort="5.0" velocity="3" />
+    <dynamics damping="1.0" friction="0.2" />
+  </joint>
+  <link name="link6">
+    <inertial>
+      <origin xyz="-0.000182345 7.94104e-05 0.0316214" rpy="0.0001368247402 0.01356033603 0.001579735694" />
+      <mass value="0.456991" />
+      <inertia ixx="0.000938039" iyy="0.000723068" izz="0.000395388" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="link6_visual_62">
+      <origin xyz="-9.304459032e-05 8.130039244e-06 -0.002000000133" rpy="2.358489504 -1.570796327 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_22.stl" />
+      </geometry>
+      <material name="material_62">
+        <color rgba="0.8980389833 0.9176470041 0.9294120073 1" />
+      </material>
+    </visual>
+    <collision name="link6_collision_62">
+      <origin xyz="-9.304459032e-05 8.130039244e-06 -0.002000000133" rpy="2.358489504 -1.570796327 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_22.stl" />
+      </geometry>
+    </collision>
+    <visual name="link6_visual_63">
+      <origin xyz="-0.0004185127363 -6.362235258e-05 0.03367545622" rpy="1.57422198 -0.009668685179 0.0004982589027" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_23.stl" />
+      </geometry>
+      <material name="material_63">
+        <color rgba="0.7921569943 0.8196079731 0.9333329797 1" />
+      </material>
+    </visual>
+    <collision name="link6_collision_63">
+      <origin xyz="-0.0004185127363 -6.362235258e-05 0.03367545622" rpy="1.57422198 -0.009668685179 0.0004982589027" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_23.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint6" type="revolute">
+    <origin xyz="8.8259e-05 -0.091 0" rpy="1.570800569 0 0" />
+    <parent link="link5" />
+    <child link="link6" />
+    <axis xyz="0 0 1" />
+    <limit lower="-2.0944" upper="2.0944" effort="5.0" velocity="3" />
+    <dynamics damping="1.0" friction="0.2" />
+  </joint>
+  <link name="link7">
+    <inertial>
+      <origin xyz="0.000651232 -0.049193 0.00972259" rpy="2.608565032 -1.344427536 -1.042251391" />
+      <mass value="0.025" />
+      <inertia ixx="7.74531e-05" iyy="7.36783e-05" izz="5.0886e-06" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="link7_visual_64">
+      <origin xyz="0.0004558150418 -0.05107128876 0.01017915803" rpy="0.07939726794 -1.37376915 1.530390433" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_24.stl" />
+      </geometry>
+      <material name="material_64">
+        <color rgba="0.7921569943 0.8196079731 0.9333329797 1" />
+      </material>
+    </visual>
+    <collision name="link7_collision_64">
+      <origin xyz="0.0004558150418 -0.05107128876 0.01017915803" rpy="0.07939726794 -1.37376915 1.530390433" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_24.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="finger_left_joint" type="prismatic">
+    <origin xyz="0 0 0.1358" rpy="1.570800569 0 0" />
+    <parent link="link6" />
+    <child link="link7" />
+    <axis xyz="0 0 1" />
+    <limit lower="0" upper=".035" effort="10" velocity=".2" />
+    <dynamics damping="1" friction=".1" />
+  </joint>
+  <link name="link8">
+    <inertial>
+      <origin xyz="0.000651232 -0.049193 0.00972259" rpy="2.608565032 -1.344427536 -1.042251391" />
+      <mass value="0.025" />
+      <inertia ixx="7.74531e-05" iyy="7.36783e-05" izz="5.0886e-06" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="link8_visual_65">
+      <origin xyz="0.0004558150418 -0.05107128876 0.01017915803" rpy="0.07939726794 -1.37376915 1.530390433" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_25.stl" />
+      </geometry>
+      <material name="material_65">
+        <color rgba="0.7921569943 0.8196079731 0.9333329797 1" />
+      </material>
+    </visual>
+    <collision name="link8_collision_65">
+      <origin xyz="0.0004558150418 -0.05107128876 0.01017915803" rpy="0.07939726794 -1.37376915 1.530390433" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_25.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="finger_right_joint" type="prismatic">
+    <origin xyz="0 0 0.1358" rpy="1.570800569 1.441957664e-12 3.141585307" />
+    <parent link="link6" />
+    <child link="link8" />
+    <axis xyz="0 0 1" />
+    <limit lower="0" upper=".035" effort="10" velocity=".2" />
+    <dynamics damping="1" friction=".1" />
+  </joint>
+  <link name="end_effector">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.1" />
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="end_effector_visual_66">
+      <origin xyz="0 0 0" rpy="0 0 3.141592654" />
+      <geometry>
+        <sphere radius="0.01" />
+      </geometry>
+      <material name="material_66">
+        <color rgba="0.5 0.5 0.5 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="end_effector_fixed_joint" type="fixed">
+    <origin xyz="0 0 0.13" rpy="0 -1.570796327 0" />
+    <parent link="link6" />
+    <child link="end_effector" />
+  </joint>
+  <link name="piper_agilex_camera_mount">
+    <visual name="piper_agilex_camera_mount_visual_67">
+      <origin xyz="0.001512508215 0.04656234529 0.02196501674" rpy="-0.4558247464 -1.320114178 1.696202674" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_45.stl" />
+      </geometry>
+      <material name="material_67">
+        <color rgba="0.1800000072 0.1899999976 0.2099999934 1" />
+      </material>
+    </visual>
+    <collision name="piper_agilex_camera_mount_bracket_collision_0">
+      <origin xyz="0.001512508215 0.04656234529 0.02196501674" rpy="-0.4558247464 -1.320114178 1.696202674" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_45.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="piper_agilex_camera_mount_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 1.570796327" />
+    <parent link="link6" />
+    <child link="piper_agilex_camera_mount" />
+  </joint>
+  <link name="piper_d435i_link">
+    <inertial>
+      <origin xyz="-0.0082 -0.0175 0" rpy="0 0 0" />
+      <mass value="0.072" />
+      <inertia ixx="5.235e-05" iyy="7.5e-06" izz="5.235e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="piper_d435i_link_visual_68">
+      <origin xyz="0.0009493664133 -0.05693653519 0.006455956061" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_26.stl" />
+      </geometry>
+      <material name="material_68">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_69">
+      <origin xyz="-0.01652049094 -0.01024998195 0.01163364014" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_27.stl" />
+      </geometry>
+      <material name="material_69">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_70">
+      <origin xyz="-0.01652049095 -0.02474998203 0.01163364016" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_28.stl" />
+      </geometry>
+      <material name="material_70">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_71">
+      <origin xyz="-0.005326739676 -0.01482132143 -0.003605002815" rpy="1.570796327 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_29.stl" />
+      </geometry>
+      <material name="material_71">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_72">
+      <origin xyz="-0.006930000477 -0.05024999981 3.999983301e-05" rpy="1.570796327 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_30.stl" />
+      </geometry>
+      <material name="material_72">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_73">
+      <origin xyz="0.0009494956121 -0.05693678446 -0.006455731005" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_31.stl" />
+      </geometry>
+      <material name="material_73">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_74">
+      <origin xyz="0.001175769649 0.02258145608 -0.005610183469" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_32.stl" />
+      </geometry>
+      <material name="material_74">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_75">
+      <origin xyz="-0.001048994203 -0.04900001096 0.009717026618" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_33.stl" />
+      </geometry>
+      <material name="material_75">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_76">
+      <origin xyz="-0.001048956734 0.007999967576 0.009717022565" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_34.stl" />
+      </geometry>
+      <material name="material_76">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_77">
+      <origin xyz="0.001350486095 -0.05701505968 -5.308344742e-07" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_35.stl" />
+      </geometry>
+      <material name="material_77">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_78">
+      <origin xyz="-0.007095148673 -0.03037767681 0.01025861404" rpy="1.570796327 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_36.stl" />
+      </geometry>
+      <material name="material_78">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_79">
+      <origin xyz="-0.006930000545 -0.0002500006547 4.000007073e-05" rpy="1.570796327 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_37.stl" />
+      </geometry>
+      <material name="material_79">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_80">
+      <origin xyz="-0.007783695986 -0.01686939393 -0.0001121654682" rpy="1.569543358 -0.01152664153 0.01239470258" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_38.obj" />
+      </geometry>
+      <material name="material_80">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_81">
+      <origin xyz="-0.001071128999 -0.05053348132 -0.009709792843" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_39.stl" />
+      </geometry>
+      <material name="material_81">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_82">
+      <origin xyz="-0.0008920805804 0.01499430855 4.738762086e-06" rpy="1.559382229 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_40.stl" />
+      </geometry>
+      <material name="material_82">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_83">
+      <origin xyz="0.0006486178691 0.01499995065 -3.467517382e-08" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_41.stl" />
+      </geometry>
+      <material name="material_83">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_84">
+      <origin xyz="0.000515104796 0.01499997348 5.65508714e-07" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_42.stl" />
+      </geometry>
+      <material name="material_84">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="piper_d435i_link_visual_85">
+      <origin xyz="-0.002402813279 -0.01749998481 -0.01129164917" rpy="-1.570796327 -1.343160249 3.141592654" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_43.stl" />
+      </geometry>
+      <material name="material_85">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <collision name="piper_d435i_link_housing_collision">
+      <origin xyz="-.0082 -.0175 0" rpy="0 0 0" />
+      <geometry>
+        <box size=".0251 .09 .025" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="piper_d435i_link_fixed_joint" type="fixed">
+    <origin xyz="0.0175 0.07257673431 0.03783375921" rpy="0 -1.270796327 -1.570796327" />
+    <parent link="piper_agilex_camera_mount" />
+    <child link="piper_d435i_link" />
+  </joint>
+  <link name="piper_d435i_depth_frame" />
+  <joint name="piper_d435i_depth_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="piper_d435i_link" />
+    <child link="piper_d435i_depth_frame" />
+  </joint>
+  <link name="piper_d435i_depth_optical_frame" />
+  <joint name="piper_d435i_depth_optical_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.570796327 0 -1.570796327" />
+    <parent link="piper_d435i_depth_frame" />
+    <child link="piper_d435i_depth_optical_frame" />
+  </joint>
+  <link name="piper_d435i_infra1_frame" />
+  <joint name="piper_d435i_infra1_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="piper_d435i_link" />
+    <child link="piper_d435i_infra1_frame" />
+  </joint>
+  <link name="piper_d435i_infra1_optical_frame" />
+  <joint name="piper_d435i_infra1_optical_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.570796327 0 -1.570796327" />
+    <parent link="piper_d435i_infra1_frame" />
+    <child link="piper_d435i_infra1_optical_frame" />
+  </joint>
+  <link name="piper_d435i_infra2_frame" />
+  <joint name="piper_d435i_infra2_frame_fixed_joint" type="fixed">
+    <origin xyz="0 -0.05 0" rpy="0 0 0" />
+    <parent link="piper_d435i_link" />
+    <child link="piper_d435i_infra2_frame" />
+  </joint>
+  <link name="piper_d435i_infra2_optical_frame" />
+  <joint name="piper_d435i_infra2_optical_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.570796327 0 -1.570796327" />
+    <parent link="piper_d435i_infra2_frame" />
+    <child link="piper_d435i_infra2_optical_frame" />
+  </joint>
+  <link name="piper_d435i_color_frame" />
+  <joint name="piper_d435i_color_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0.015 0" rpy="0 0 0" />
+    <parent link="piper_d435i_link" />
+    <child link="piper_d435i_color_frame" />
+  </joint>
+  <link name="piper_d435i_color_optical_frame" />
+  <joint name="piper_d435i_color_optical_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.570796327 0 -1.570796327" />
+    <parent link="piper_d435i_color_frame" />
+    <child link="piper_d435i_color_optical_frame" />
+  </joint>
+  <link name="piper_d435i_imu_frame" />
+  <joint name="piper_d435i_imu_frame_fixed_joint" type="fixed">
+    <origin xyz="-0.01174 -0.00552 0.0051" rpy="0 0 0" />
+    <parent link="piper_d435i_link" />
+    <child link="piper_d435i_imu_frame" />
+  </joint>
+  <link name="piper_d435i_imu_optical_frame" />
+  <joint name="piper_d435i_imu_optical_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.570796327 0 -1.570796327" />
+    <parent link="piper_d435i_imu_frame" />
+    <child link="piper_d435i_imu_optical_frame" />
+  </joint>
+  <link name="go2_d435i_pitch_pivot" />
+  <joint name="go2_d435i_pitch_pivot_fixed_joint" type="fixed">
+    <origin xyz="0.298 0 0.07" rpy="0 0.2617993878 0" />
+    <parent link="base_link" />
+    <child link="go2_d435i_pitch_pivot" />
+  </joint>
+  <link name="go2_d435i_bracket_link">
+    <visual name="go2_d435i_bracket_link_visual_86">
+      <origin xyz="0.02572545407 2.979464336e-10 0.01069738006" rpy="-1.570796327 -1.219399473 3.141592654" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_44.stl" />
+      </geometry>
+      <material name="material_86">
+        <color rgba="0.1299999952 0.1400000006 0.1599999964 1" />
+      </material>
+    </visual>
+    <collision name="go2_d435i_bracket_link_bracket_collision_0">
+      <origin xyz="0.02572545407 2.979464336e-10 0.01069738006" rpy="-1.570796327 -1.219399473 3.141592654" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_44.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="go2_d435i_bracket_link_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="go2_d435i_pitch_pivot" />
+    <child link="go2_d435i_bracket_link" />
+  </joint>
+  <link name="go2_d435i_bottom_screw_frame" />
+  <joint name="go2_d435i_bottom_screw_frame_fixed_joint" type="fixed">
+    <origin xyz="0.042 0 0" rpy="0 0 0" />
+    <parent link="go2_d435i_pitch_pivot" />
+    <child link="go2_d435i_bottom_screw_frame" />
+  </joint>
+  <link name="go2_d435i_link">
+    <inertial>
+      <origin xyz="-0.0082 -0.0175 0" rpy="0 0 0" />
+      <mass value="0.072" />
+      <inertia ixx="5.235e-05" iyy="7.5e-06" izz="5.235e-05" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="go2_d435i_link_visual_87">
+      <origin xyz="0.0009493664133 -0.05693653519 0.006455956061" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_26.stl" />
+      </geometry>
+      <material name="material_87">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_88">
+      <origin xyz="-0.01652049094 -0.01024998195 0.01163364014" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_27.stl" />
+      </geometry>
+      <material name="material_88">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_89">
+      <origin xyz="-0.01652049095 -0.02474998203 0.01163364016" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_28.stl" />
+      </geometry>
+      <material name="material_89">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_90">
+      <origin xyz="-0.005326739676 -0.01482132143 -0.003605002815" rpy="1.570796327 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_29.stl" />
+      </geometry>
+      <material name="material_90">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_91">
+      <origin xyz="-0.006930000477 -0.05024999981 3.999983301e-05" rpy="1.570796327 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_30.stl" />
+      </geometry>
+      <material name="material_91">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_92">
+      <origin xyz="0.0009494956121 -0.05693678446 -0.006455731005" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_31.stl" />
+      </geometry>
+      <material name="material_92">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_93">
+      <origin xyz="0.001175769649 0.02258145608 -0.005610183469" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_32.stl" />
+      </geometry>
+      <material name="material_93">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_94">
+      <origin xyz="-0.001048994203 -0.04900001096 0.009717026618" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_33.stl" />
+      </geometry>
+      <material name="material_94">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_95">
+      <origin xyz="-0.001048956734 0.007999967576 0.009717022565" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_34.stl" />
+      </geometry>
+      <material name="material_95">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_96">
+      <origin xyz="0.001350486095 -0.05701505968 -5.308344742e-07" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_35.stl" />
+      </geometry>
+      <material name="material_96">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_97">
+      <origin xyz="-0.007095148673 -0.03037767681 0.01025861404" rpy="1.570796327 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_36.stl" />
+      </geometry>
+      <material name="material_97">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_98">
+      <origin xyz="-0.006930000545 -0.0002500006547 4.000007073e-05" rpy="1.570796327 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_37.stl" />
+      </geometry>
+      <material name="material_98">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_99">
+      <origin xyz="-0.007783695986 -0.01686939393 -0.0001121654682" rpy="1.569543358 -0.01152664153 0.01239470258" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_38.obj" />
+      </geometry>
+      <material name="material_99">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_100">
+      <origin xyz="-0.001071128999 -0.05053348132 -0.009709792843" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_39.stl" />
+      </geometry>
+      <material name="material_100">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_101">
+      <origin xyz="-0.0008920805804 0.01499430855 4.738762086e-06" rpy="1.559382229 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_40.stl" />
+      </geometry>
+      <material name="material_101">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_102">
+      <origin xyz="0.0006486178691 0.01499995065 -3.467517382e-08" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_41.stl" />
+      </geometry>
+      <material name="material_102">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_103">
+      <origin xyz="0.000515104796 0.01499997348 5.65508714e-07" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_42.stl" />
+      </geometry>
+      <material name="material_103">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <visual name="go2_d435i_link_visual_104">
+      <origin xyz="-0.002402813279 -0.01749998481 -0.01129164917" rpy="-1.570796327 -1.343160249 3.141592654" />
+      <geometry>
+        <mesh filename="assets/urdf_mesh_43.stl" />
+      </geometry>
+      <material name="material_104">
+        <color rgba="0.7490196228 0.7490196228 0.7490196228 1" />
+      </material>
+    </visual>
+    <collision name="go2_d435i_link_housing_collision">
+      <origin xyz="-.0082 -.0175 0" rpy="0 0 0" />
+      <geometry>
+        <box size=".0251 .09 .025" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="go2_d435i_link_fixed_joint" type="fixed">
+    <origin xyz="0.0106 0.0175 0.0125" rpy="0 0 0" />
+    <parent link="go2_d435i_bottom_screw_frame" />
+    <child link="go2_d435i_link" />
+  </joint>
+  <link name="go2_d435i_depth_frame" />
+  <joint name="go2_d435i_depth_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="go2_d435i_link" />
+    <child link="go2_d435i_depth_frame" />
+  </joint>
+  <link name="go2_d435i_depth_optical_frame" />
+  <joint name="go2_d435i_depth_optical_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.570796327 0 -1.570796327" />
+    <parent link="go2_d435i_depth_frame" />
+    <child link="go2_d435i_depth_optical_frame" />
+  </joint>
+  <link name="go2_d435i_infra1_frame" />
+  <joint name="go2_d435i_infra1_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="go2_d435i_link" />
+    <child link="go2_d435i_infra1_frame" />
+  </joint>
+  <link name="go2_d435i_infra1_optical_frame" />
+  <joint name="go2_d435i_infra1_optical_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.570796327 0 -1.570796327" />
+    <parent link="go2_d435i_infra1_frame" />
+    <child link="go2_d435i_infra1_optical_frame" />
+  </joint>
+  <link name="go2_d435i_infra2_frame" />
+  <joint name="go2_d435i_infra2_frame_fixed_joint" type="fixed">
+    <origin xyz="0 -0.05 0" rpy="0 0 0" />
+    <parent link="go2_d435i_link" />
+    <child link="go2_d435i_infra2_frame" />
+  </joint>
+  <link name="go2_d435i_infra2_optical_frame" />
+  <joint name="go2_d435i_infra2_optical_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.570796327 0 -1.570796327" />
+    <parent link="go2_d435i_infra2_frame" />
+    <child link="go2_d435i_infra2_optical_frame" />
+  </joint>
+  <link name="go2_d435i_color_frame" />
+  <joint name="go2_d435i_color_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0.015 0" rpy="0 0 0" />
+    <parent link="go2_d435i_link" />
+    <child link="go2_d435i_color_frame" />
+  </joint>
+  <link name="go2_d435i_color_optical_frame" />
+  <joint name="go2_d435i_color_optical_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.570796327 0 -1.570796327" />
+    <parent link="go2_d435i_color_frame" />
+    <child link="go2_d435i_color_optical_frame" />
+  </joint>
+  <link name="go2_d435i_imu_frame" />
+  <joint name="go2_d435i_imu_frame_fixed_joint" type="fixed">
+    <origin xyz="-0.01174 -0.00552 0.0051" rpy="0 0 0" />
+    <parent link="go2_d435i_link" />
+    <child link="go2_d435i_imu_frame" />
+  </joint>
+  <link name="go2_d435i_imu_optical_frame" />
+  <joint name="go2_d435i_imu_optical_frame_fixed_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.570796327 0 -1.570796327" />
+    <parent link="go2_d435i_imu_frame" />
+    <child link="go2_d435i_imu_optical_frame" />
+  </joint>
+  <gazebo reference="go2_d435i_color_frame">
+    <sensor name="go2_d435i_rgb" type="camera">
+      <always_on>true</always_on>
+      <update_rate>30</update_rate>
+      <camera>
+        <horizontal_fov>1.1976659771844107</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>360</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.01</near>
+          <far>50</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+  <gazebo reference="piper_d435i_color_frame">
+    <sensor name="piper_d435i_rgb" type="camera">
+      <always_on>true</always_on>
+      <update_rate>30</update_rate>
+      <camera>
+        <horizontal_fov>1.1976659771844107</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>360</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.01</near>
+          <far>50</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+  <link name="back_cube_box">
+    <inertial>
+      <origin xyz="0 0 0.04051006711" rpy="0 0 0" />
+      <mass value="0.5" />
+      <inertia ixx="0.0057816506763959585" iyy="0.005781650676395958" izz="0.010067507829977632" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="back_box_bottom_visual">
+      <origin xyz="0 0 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.28 0.008" />
+      </geometry>
+      <material name="box_bottom">
+        <color rgba=".07 .20 .32 1" />
+      </material>
+    </visual>
+    <collision name="back_box_bottom_collision">
+      <origin xyz="0 0 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.28 0.008" />
+      </geometry>
+    </collision>
+    <visual name="back_box_front_visual">
+      <origin xyz="0.136 0 0.064" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.28 0.112" />
+      </geometry>
+      <material name="box_front">
+        <color rgba=".13 .43 .72 1" />
+      </material>
+    </visual>
+    <collision name="back_box_front_collision">
+      <origin xyz="0.136 0 0.064" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.28 0.112" />
+      </geometry>
+    </collision>
+    <visual name="back_box_rear_visual">
+      <origin xyz="-0.136 0 0.064" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.28 0.112" />
+      </geometry>
+      <material name="box_rear">
+        <color rgba=".13 .43 .72 1" />
+      </material>
+    </visual>
+    <collision name="back_box_rear_collision">
+      <origin xyz="-0.136 0 0.064" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.28 0.112" />
+      </geometry>
+    </collision>
+    <visual name="back_box_left_visual">
+      <origin xyz="0 0.136 0.064" rpy="0 0 0" />
+      <geometry>
+        <box size="0.264 0.008 0.112" />
+      </geometry>
+      <material name="box_left">
+        <color rgba=".13 .43 .72 1" />
+      </material>
+    </visual>
+    <collision name="back_box_left_collision">
+      <origin xyz="0 0.136 0.064" rpy="0 0 0" />
+      <geometry>
+        <box size="0.264 0.008 0.112" />
+      </geometry>
+    </collision>
+    <visual name="back_box_right_visual">
+      <origin xyz="0 -0.136 0.064" rpy="0 0 0" />
+      <geometry>
+        <box size="0.264 0.008 0.112" />
+      </geometry>
+      <material name="box_right">
+        <color rgba=".13 .43 .72 1" />
+      </material>
+    </visual>
+    <collision name="back_box_right_collision">
+      <origin xyz="0 -0.136 0.064" rpy="0 0 0" />
+      <geometry>
+        <box size="0.264 0.008 0.112" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="back_cube_box_fixed_joint" type="fixed">
+    <origin xyz="-.10 0 0.115" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="back_cube_box" />
+  </joint>
+  <link name="back_box_mount_rails">
+    <inertial>
+      <origin xyz="0 0 0.029" rpy="0 0 0" />
+      <mass value="0.08" />
+      <inertia ixx="8.290666666666666e-05" iyy="0.00015309333333333335" izz="0.0001911466666666667" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual name="box_mount_left_visual">
+      <origin xyz="0 0.027 0.029" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.018 0.058" />
+      </geometry>
+      <material name="box_mount_dark">
+        <color rgba=".12 .14 .17 1" />
+      </material>
+    </visual>
+    <collision name="box_mount_left_collision">
+      <origin xyz="0 0.027 0.029" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.018 0.058" />
+      </geometry>
+    </collision>
+    <visual name="box_mount_right_visual">
+      <origin xyz="0 -0.027 0.029" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.018 0.058" />
+      </geometry>
+      <material name="box_mount_dark">
+        <color rgba=".12 .14 .17 1" />
+      </material>
+    </visual>
+    <collision name="box_mount_right_collision">
+      <origin xyz="0 -0.027 0.029" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.018 0.058" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="back_box_mount_rails_fixed_joint" type="fixed">
+    <origin xyz="-.10 0 .057" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="back_box_mount_rails" />
+  </joint>
+</robot>

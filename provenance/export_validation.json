@@ -1,0 +1,53 @@
+{
+  "validated_at": "2026-11-12T13:32:30.763616+08:00",
+  "snapshot": "v11_standing_support",
+  "bundle": {
+    "source_and_physics_sha256_match": true,
+    "verified_files": 208,
+    "upstream_amp_clips": 17,
+    "supplemental_amp_clips": 40,
+    "free_base": true,
+    "mujoco_mass_kg": 19.842947567403694,
+    "mujoco_nq": 27,
+    "mujoco_nv": 26,
+    "trajectory_arrays_finite": true
+  },
+  "smoke": {
+    "status": "smoke_passed",
+    "completed_iterations": 4,
+    "num_envs": 8,
+    "device": "cpu",
+    "process_exitcode": 0,
+    "loco_updates": 4,
+    "amp_updates": 4,
+    "checkpoint_restore_actions_match": true,
+    "acceptance_passed": false
+  },
+  "checkpoint": {
+    "iteration": 3,
+    "finite": true,
+    "sha256": "0f2dd07dd0d20e089e97a2b22f8faf0ba6051b8ddb32df31247d10111f3eb28f"
+  },
+  "preview": {
+    "panel_state_rendered": true,
+    "frames": 25,
+    "base_controls": 3,
+    "arm_controls": 6,
+    "gripper_controls": 1,
+    "actual_widget_ranges": [
+      [
+        -1.0,
+        1.0
+      ],
+      [
+        -0.6,
+        0.6
+      ],
+      [
+        -0.8,
+        0.8
+      ]
+    ]
+  },
+  "scope": "Packaging and runtime import/update/save/reload/render checks only; no learned-policy acceptance or new formal training."
+}

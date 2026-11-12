@@ -19,6 +19,7 @@ from robot_constants import DEFAULT_Q,JOINT_NAMES,EFFORT_LIMITS
 from arm_fk import ArmFK
 from curriculum import STAGES,sample_commands,tracking_terms,motion_gate
 from base_commands import advance_base_command
+from leg_action import LEG_ACTION_CONTROL, filter_action, leg_targets
 R=Path(__file__).resolve().parent
 LEG_ORDER=("FL","FR","RL","RR")
 SPLIT_FOOT_ASSET="robot_contact_split.usda"
@@ -149,7 +150,7 @@ class DualModeEnv(DirectRLEnv):
 
     def _pre_physics_step(self,actions):
         self.last_actions.copy_(self.actions);self.actions=actions.clamp(-1,1)
-        self.filtered+=.2*(self.actions-self.filtered)
+        self.filtered.copy_(filter_action(self.filtered,self.actions))
         self.command_age+=self.step_dt
         change=torch.where(self.command_age>self.command_period)[0]
         if len(change):self._sample_base_commands(change)
@@ -181,8 +182,8 @@ class DualModeEnv(DirectRLEnv):
         gravity=self.robot.root_physx_view.get_gravity_compensation_forces()
         coriolis=self.robot.root_physx_view.get_coriolis_and_centrifugal_compensation_forces()
         effort=torch.zeros_like(q)
-        target=self.nominal[:,self.legs]+.35*self.filtered[:,:12]
-        effort[:,self.legs]=45*(target-q[:,self.legs])-1.5*v[:,self.legs]
+        target=leg_targets(self.nominal[:,self.legs],self.filtered,self.robot.data.soft_joint_pos_limits[:,self.legs])
+        effort[:,self.legs]=LEG_ACTION_CONTROL['kp']*(target-q[:,self.legs])-LEG_ACTION_CONTROL['kd']*v[:,self.legs]
         residual=(.003 if self.level>0 else 0.)*self.filtered[:,12:18]
         acc=self.ref_a+self.omega**2*(self.ref+residual-q[:,self.arm])+2*self.zeta*self.omega*(self.ref_v-v[:,self.arm])
         effort[:,self.arm]=torch.bmm(M,acc[:,:,None]).squeeze(-1)+gravity[:,self.mass_arm]+coriolis[:,self.mass_arm]+self.ref_v+.2*torch.tanh(self.ref_v/.02)
@@ -197,7 +198,10 @@ class DualModeEnv(DirectRLEnv):
         return data.body_link_pos_w[:,self.foot_bodies],data.body_link_lin_vel_w[:,self.foot_bodies]
 
     def foot_contact_forces(self):
-        return self.contact.data.net_forces_w[:,self.feet].norm(dim=-1)
+        return self.foot_contact_normals_w().norm(dim=-1)
+
+    def foot_contact_normals_w(self):
+        return self.contact.data.net_forces_w[:,self.feet]
 
     def _metrics(self):
         q=self.robot.data.root_quat_w;Rmat=matrix_from_quat(q)

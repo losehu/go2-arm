@@ -36,6 +36,9 @@ def restore_stage1(path,env,loco,arm,home,stage1_budget,allow_mount_rails=False,
     assert saved['arm_level']==-1,'Only stage-one restoration is supported'
     assert_finite(saved['loco']);assert_finite(saved['arm'])
     old=saved['manifest'];first=int(saved['iteration'])+1
+    from leg_action import LEG_ACTION_CONTROL
+    assert old.get('leg_action_controller')==LEG_ACTION_CONTROL,'Leg controller changed; use a fresh run'
+    assert old.get('curriculum_revision')=='full_speed_before_attitude_v8','Stage-one schedule changed; use a fresh run'
     amp_resume={}
     if amp is not None:
         assert old.get('stage1_amp')==amp.metadata,'AMP features, reference data or settings differ'

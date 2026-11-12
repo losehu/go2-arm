@@ -1,0 +1,21 @@
+{
+  "python": "3.11.18",
+  "platform": "Linux-5.15.0-164-generic-x86_64-with-glibc2.35",
+  "packages": {
+    "torch": "2.7.0+cu128",
+    "isaacsim": "5.1.0.0",
+    "isaaclab": "0.54.3",
+    "isaaclab_assets": "0.2.4",
+    "isaaclab_tasks": "0.11.14",
+    "skrl": null,
+    "numpy": "1.26.0",
+    "scipy": "1.15.3",
+    "mujoco": null,
+    "Pillow": "11.3.0",
+    "tensorboard": "2.20.0",
+    "usd-core": null,
+    "PyYAML": "6.0.2",
+    "rsl-rl-lib": "5.0.1",
+    "tensordict": "0.8.3"
+  }
+}

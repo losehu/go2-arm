@@ -2,7 +2,8 @@ import argparse,json,os,sys,time,shutil,hashlib,traceback
 from pathlib import Path
 from datetime import datetime
 from isaaclab.app import AppLauncher
-from stage1_schedule import STAGE1_LEVELS,STAGE1_BUDGET,stage1_ready,next_stage1_level
+from stage1_schedule import STAGE1_BUDGET,stage1_ready,ATTITUDE_CURRICULUM
+from imitation_commands import IMITATION_COMMANDS
 p=argparse.ArgumentParser();p.add_argument('--num_envs',type=int,default=4096);p.add_argument('--stage1_iterations',type=int,default=STAGE1_BUDGET);p.add_argument('--stage2_iterations',type=int,default=40000);p.add_argument('--smoke',action='store_true');p.add_argument('--run_dir');p.add_argument('--resume_checkpoint',type=Path);p.add_argument('--allow_mount_rails_revision',action='store_true')
 p.add_argument('--amp', action='store_true', help='Add the Go2 AMP style reward in stage one')
 p.add_argument('--hip_splay_penalty', action='store_true', help='Penalize excessive outward hip angles')
@@ -16,6 +17,8 @@ if args.phase_free_amp and not args.amp:
  p.error('--phase_free_amp requires --amp')
 if args.directional_amp and not args.phase_free_amp:
  p.error('--directional_amp requires --amp --phase_free_amp')
+if args.resume_checkpoint:
+ p.error('v8 controller and sampling require a fresh run; resume is not validated')
 if args.stop_after_updates is not None and args.stop_after_updates <= 0:
  p.error('--stop_after_updates must be positive')
 R=Path(__file__).resolve().parent
@@ -28,6 +31,13 @@ try:
  from cooperative_ppo import make_ppo,observations,finite_models
  from robot_constants import DEFAULT_Q
  from base_commands import VELOCITY_DEADZONE
+ from leg_action import LEG_ACTION_CONTROL
+ from speed_gate import SPEED_GATE
+ from swing_clearance import SWING_CLEARANCE
+ from stance_cadence import STANCE_CADENCE
+ from standing_support import STANDING_SUPPORT
+ from episode_objective import EPISODE_OBJECTIVE,initial_leg_std
+ from training_health import TRAINING_HEALTH,TrainingHealth
  from base_env import SPLIT_FOOT_ASSET
  from torch.utils.tensorboard import SummaryWriter
  torch.set_num_threads(4);torch.manual_seed(61108)
@@ -52,6 +62,7 @@ try:
   from directional_amp import DirectionalAMP
   amp=DirectionalAMP(R/'amp_reference',env)
   env.amp_command_bank=(amp.command_scale,amp.clip_commands,amp.clip_signatures)
+  env.configure_imitation_commands(amp)
   env.reset()
   env.log_metrics={}
  elif args.amp:
@@ -71,9 +82,10 @@ try:
  manifest={'run_dir':str(run),'pid':os.getpid(),'pid_start_ticks':int(Path(f'/proc/{os.getpid()}/stat').read_text().rsplit(')',1)[1].split()[19]),'num_envs':args.num_envs,'stage1_iterations':args.stage1_iterations,'stage2_iterations':args.stage2_iterations,'total_budget':args.stage1_iterations+args.stage2_iterations,'user_continuous_commands':10,'automatic_pitch_roll':True,'loco_actions':12,'arm_actions':8,'loco_obs_dim':env.get_loco_observation().shape[-1],'arm_obs_dim':env.get_arm_observation().shape[-1],'separate_actors_critics_optimizers':True,'is_fixed_base':env.robot.is_fixed_base,'full_mass_kg':float(env.robot.root_physx_view.get_masses()[0].sum()),'from_scratch':True,'urdf_sha256':hashlib.sha256((R/'robot/robot.urdf').read_bytes()).hexdigest(),'source_hashes':{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in [*R.glob('*.py'),R/'whole_body_bank.npz',R/'controller_bench_report.json']},'acceptance_passed':False}
  manifest.update(home_pose='folded_forward',home_arm_q=DEFAULT_Q[19:25].tolist(),home_arm_deg=np.rad2deg(DEFAULT_Q[19:25]).tolist(),home_consistency_verified=True)
  manifest.update(optimization_revision='executed_entropy_posture_tracking_tail_v3',reward_revision='posture_and_tracking_log_tail_v1',tracking_reward_revision='tracking_log_tail_v1',entropy_regularizer='mixed-measure entropy of executed clamp(Normal,-1,1)',parent_run=json.loads((R/'repair_metadata.json').read_text())['parent_run'])
- manifest.update(curriculum_revision='decoupled_stage1_curriculum_v4',stage1_schedule=[{'range_scale':r,'guidance_cap_deg':g} for r,g in STAGE1_LEVELS],curriculum_min_dwell_iterations=500,stage1_budget_basis=json.loads((R/'repair_metadata.json').read_text())['stage1_budget_basis'])
+ manifest.update(curriculum_revision='expert_frames_to_omni_continuous_v8',imitation_commands=IMITATION_COMMANDS,attitude_curriculum=ATTITUDE_CURRICULUM,stage1_budget_basis=json.loads((R/'repair_metadata.json').read_text())['stage1_budget_basis'])
  manifest.update(budget_revision='final_curriculum_time_reserve_v5',expected_final_checkpoint=f'model_{args.stage1_iterations+args.stage2_iterations-1}.pt')
  manifest.update(controller_revision='arm5_bandwidth_v7',arm_controller_omega_rad_s=env.omega.detach().cpu().tolist(),arm_controller_damping_ratio=env.zeta)
+ manifest.update(leg_action_controller=LEG_ACTION_CONTROL,full_speed_direction_gate=SPEED_GATE,swing_clearance_reward=SWING_CLEARANCE,stance_cadence=STANCE_CADENCE)
  manifest.update(episode_success_revision='timeout_without_physical_termination_v8')
  manifest.update(foot_sphere_radius_m=.022,foot_slip_metric_threshold_mps=.1)
  manifest['asset_hashes']={str(f.relative_to(R)):hashlib.sha256(f.read_bytes()).hexdigest() for f in [R/'robot/robot.urdf',R/'robot/robot_mjcf.xml',R/'robot/scene.xml',R/'robot/usd'/SPLIT_FOOT_ASSET,*sorted((R/'robot/usd').rglob('*.usd'))]}
@@ -89,8 +101,11 @@ try:
   if args.directional_amp:
    from air_time import AIR_TIME_REWARD
    from base_height_objective import BASE_HEIGHT_SPEC
+   from diagonal_support import DIAGONAL_SUPPORT
+   from foot_participation import FOOT_PARTICIPATION
    manifest.update(directional_amp=True,air_time_reward=AIR_TIME_REWARD,base_height_penalty=BASE_HEIGHT_SPEC,
-    gait_reward_revision='amp_split_foot_deadzone_v4',lateral_command_min_mps=.12)
+    foot_participation=FOOT_PARTICIPATION,diagonal_support_reward=DIAGONAL_SUPPORT,
+    gait_reward_revision='amp_standing_support_discount_v11',standing_support_reward=STANDING_SUPPORT,lateral_command_min_mps=.12)
  else:
   manifest.update(gait_reward_revision='diagonal_trot_footcenter_clearance_placement_v9',foot_swing_peak_clearance_m=.04,gait_name='diagonal_trot',gait_leg_order=['FL','FR','RL','RR'],gait_phase_offsets=[0.,.5,.5,0.],gait_frequency_hz=3.,gait_reward_weight=6.,gait_clearance_cost_weight=4.,gait_placement_cost_weight=25.,gait_standing_mode='four_feet_support')
   if args.coordinated_trot:
@@ -98,6 +113,7 @@ try:
    manifest.update(coordinated_trot=COORDINATED_TROT,gait_reward_revision=COORDINATED_TROT['revision'],
     gait_frequency_hz=COORDINATED_TROT['frequency_hz'],foot_swing_peak_clearance_m=COORDINATED_TROT['swing_peak_m'],
     gait_clearance_cost_weight=COORDINATED_TROT['clearance_cost_weight'])
+ manifest['repair_parent_run']=json.loads((R/'repair_metadata.json').read_text())['parent_run']
  manifest.update(resume);manifest.setdefault('first_training_iteration',0)
  if args.hip_splay_penalty:
   from hip_splay import HIP_SPLAY_REWARD
@@ -108,6 +124,7 @@ try:
   manifest['stage1_amp']=amp.metadata
   if not args.smoke:
    shutil.copytree(R/'amp_reference',run/'source'/'amp_reference')
+ manifest.update(episode_objective=EPISODE_OBJECTIVE,initial_leg_action_std=initial_leg_std('cpu').tolist(),training_health_guard=TRAINING_HEALTH)
  manifest['trial_stop_after_updates']=args.stop_after_updates
  manifest['planned_stop_iteration']=limit-1
  (run/'manifest.json').write_text(json.dumps(manifest,indent=2));print('MODEL_VERIFIED',json.dumps(manifest),flush=True)
@@ -118,31 +135,28 @@ try:
  def save(i,label=None):
   checkpoint=run/(label or f'model_{i}.pt');tmp=checkpoint.with_suffix('.tmp')
   payload={'format':'roboduet_dualmode_v1','iteration':i,'loco_updates':loco_updates,'arm_updates':arm_updates,'loco':loco.save(),'arm':arm.save(),'training_stage':env.training_stage,'range_scale':env.range_scale,'arm_level':env.level,'stage1_curriculum_level':env.stage1_curriculum_level,'guidance_cap_deg':env.guidance_cap_deg,'success_ema':env.success_ema,'precision_success_ema':env.precision_success_ema,'home_arm_q':DEFAULT_Q[19:25].tolist(),'manifest':manifest}
+  payload['command_curriculum']={'omni_fraction':env.imitation_commands.fraction,'full_speed_learned':env.full_speed_learned,'guidance_cap_deg':env.guidance_cap_deg}
   if amp is not None:
    payload['amp']=amp.save()
    payload['amp_updates']=amp_updates
   torch.save(payload,tmp);tmp.replace(checkpoint);return checkpoint
  if resume:save(first_iteration-1,'resume_input.pt')
+ health_guard=TrainingHealth()
  status='stage1_trial_complete_pending_evaluation' if limit<total else 'iterations_complete_pending_acceptance'
  for i in range(first_iteration,limit):
   env.training_iteration=i
   if i==args.stage1_iterations:
    save(i-1,'stage1_final.pt')
-   if not args.smoke and not stage1_ready(env.stage1_curriculum_level,env.range_scale,env.guidance_cap_deg,env.success_ema):
+   if not args.smoke and not stage1_ready(env.range_scale,env.guidance_cap_deg,env.success_ema,env.full_speed_learned):
     status='stage1_budget_complete_gate_not_passed';print('STAGE1_GATE_NOT_PASSED',env.range_scale,env.success_ema,flush=True);break
    with torch.inference_mode():env.set_training_stage(2)
    print('COOPERATIVE_STAGE_STARTED',i,flush=True)
   if env.training_stage==1:
-   next_level=next_stage1_level(env.stage1_curriculum_level,env.success_ema,i,last_advance)
-   if next_level!=env.stage1_curriculum_level:
-    gate_success=env.success_ema
-    with torch.inference_mode():
-     env.set_stage1_curriculum(next_level)
-     if args.directional_amp:amp.clear_history()
-    last_advance=i
-    print('STAGE1_CURRICULUM_ADVANCED',json.dumps({'iteration':i,'level':next_level,'range_scale':env.range_scale,'guidance_cap_deg':env.guidance_cap_deg,'previous_success_ema':gate_success}),flush=True)
+   env.update_command_curriculum(i)
   elif i-last_advance>=500 and env.success_ema>.7 and env.level<2 and env.precision_success_ema>.5:
    env.level+=1;env.success_ema=0.;env.precision_success_ema=0.;last_advance=i;env.last_curriculum_change_iteration=i
+  env.rollout_health.zero_()
+  raw_shaping=[];floor_fractions=[]
   tic=time.time();rew_l=[];rew_a=[];failures=0;loco_clips=[];arm_clips=[]
   active_amp=amp is not None and env.training_stage==1
   amp_rollout=[];amp_valid=[];amp_rewards=[]
@@ -159,6 +173,7 @@ try:
     _,_,term,trunc,extras=env.step(action)
     dones=term|trunc;failures+=int(term.sum());extra={'time_outs':trunc&~term}
     next_lo=observations(env.get_loco_observation());next_ao=observations(env.get_arm_observation())
+    raw_shaping.append(env.raw_loco_shaping.mean());floor_fractions.append((env.raw_loco_shaping<0).float().mean())
     leg_reward=env.loco_reward
     if active_amp:
      if args.directional_amp:
@@ -193,12 +208,19 @@ try:
   assert finite_models(loco,arm),'Non-finite model parameters'
   state={'status':'running','iteration':i,'completed_iterations':i+1,'target_iterations':limit,'updated_at':datetime.now().astimezone().isoformat(),'elapsed_wall_s':time.time()-t0,'iteration_s':time.time()-tic,'collection_s':collected,'learning_s':time.time()-learning,'training_stage':env.training_stage,'range_scale':env.range_scale,'arm_level':env.level,'success_ema':env.success_ema,'precision_success_ema':env.precision_success_ema,'loco_updates':loco_updates,'arm_updates':arm_updates,'num_envs':env.num_envs,'pid':os.getpid(),'run_dir':str(run),'metrics':env.log_metrics,'termination_count':failures,'mean_leg_reward':float(np.mean(rew_l)),'mean_arm_reward':float(np.mean(rew_a))}
   state.update(stage1_curriculum_level=env.stage1_curriculum_level,guidance_cap_deg=env.guidance_cap_deg,last_curriculum_change_iteration=env.last_curriculum_change_iteration)
+  state['style_positive_factor_mean']=float(torch.as_tensor(env.style_positive_factor).float().mean())
+  writer.add_scalar('style_positive_factor_mean',state['style_positive_factor_mean'],i)
   if active_amp:
    state['amp']=amp_stats
    state['amp_updates']=amp_updates
    if args.directional_amp and (i%10==0 or args.smoke):state['amp_coverage']=amp.coverage(amp_rollout,amp_valid)
    for key,value in amp_stats.items():
     writer.add_scalar('amp/'+key,value,i)
+  h=env.rollout_health.tolist();reset_count=h[0]
+  state['rollout_health']={'reset_count':int(reset_count),'mean_completed_episode_steps':h[1]/max(reset_count,1),'physical_termination_fraction':h[2]/max(reset_count,1),'timeout_fraction':h[3]/max(reset_count,1),'calf_contact_episode_fraction':h[4]/max(reset_count,1),'raw_shaping_mean':float(torch.stack(raw_shaping).mean()),'shaping_floor_fraction':float(torch.stack(floor_fractions).mean())}
+  invalid_loop=health_guard.check(i,env.num_envs,reset_count,state['rollout_health']['mean_completed_episode_steps'],amp_stats.get('matched_history_fraction',1.)) if args.directional_amp else False
+  state['rollout_health']['invalid_loop_consecutive_updates']=health_guard.consecutive
+  state['command_curriculum']={'omni_fraction':env.imitation_commands.fraction,'guidance_cap_deg':env.guidance_cap_deg,'full_speed_learned':env.full_speed_learned,**env.full_speed_gate.metrics()}
   state['optimization']={**{'loco/'+k:float(v) for k,v in loss_l.items()},**{'arm/'+k:float(v) for k,v in loss_a.items()}}
   state['policy_distribution']={'loco_std_min':float(loco.actor.distribution.log_std_param.exp().min()),'loco_std_max':float(loco.actor.distribution.log_std_param.exp().max()),'loco_std_mean':float(loco.actor.distribution.log_std_param.exp().mean()),'loco_raw_entropy':float(loco.actor.distribution.raw_entropy.mean()),'loco_action_clip_fraction':float(np.mean(loco_clips)),'arm_action_clip_fraction':float(np.mean(arm_clips))}
   tmp=run/'progress.tmp';tmp.write_text(json.dumps(state,indent=2));tmp.replace(run/'progress.json')
@@ -206,7 +228,11 @@ try:
   for k,v in state['policy_distribution'].items():writer.add_scalar('policy_distribution/'+k,v,i)
   for k,v in {**env.log_metrics,'range_scale':env.range_scale,'success_ema':env.success_ema,'stage':env.training_stage,'loco_reward':state['mean_leg_reward'],'arm_reward':state['mean_arm_reward']}.items():writer.add_scalar(k,v,i)
   if i%10==0 or args.smoke:print('TRAIN_PROGRESS',json.dumps(state),flush=True)
-  if i%1000==0 or i==first_iteration:save(i)
+  for k,v in state['rollout_health'].items():writer.add_scalar('rollout_health/'+k,v,i)
+  if i%1000==0 or i==first_iteration or i in (100,250,500):save(i)
+  if invalid_loop:
+   save(i,'health_stop.pt');(run/'health_failure.json').write_text(json.dumps(state,indent=2))
+   raise RuntimeError('Sustained short physical-failure episodes starved AMP; evidence saved, stopping')
  else:i=limit
  completed=i
  final_checkpoint=save(completed-1)

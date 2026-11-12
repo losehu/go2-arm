@@ -1,105 +1,104 @@
-# Go2 + Piper · AMP 行走训练与实时仿真
+# Go2 + Piper · RoboDuet PPO / Directional AMP · v11
 
-Unitree Go2 搭载前移 Piper 机械臂、开口盒和双 D435i 的自由底盘仿真。代码包含 Isaac Lab 训练、加载检查点后的 PhysX 推理，以及带右侧指令面板的 Tk/MuJoCo 可视化。
+Unitree Go2 搭载前移 Piper、开口盒和双 D435i 的自由底盘训练项目。包含当前 **v11 静止落脚与承重修复版**的完整训练源码、机器人网格、URDF / MJCF / USD、轨迹库，以及 17 条上游 AMP 动作和 40 条筛选后的补录动作。克隆后无需从原工作目录复制机器人资产。
 
-当前配方是第一阶段无相位 AMP v5。PPO 优化速度跟踪、姿态稳定、触地防滑、髋部外摆约束和 AMP 风格奖励。底盘策略观测为 69 维。按指令方向筛选参考动作，再按速度加权采样。匹配的归一化速度距离上限为 0.30。80% 的组合目标会尝试引导到同方向的已验证速度。
+当前配方：双策略 PPO、方向条件 AMP、无固定步态相位；阶段一保持机械臂折叠，学习底盘行走与停车。所有载荷、自碰撞和非足端接触终止均保留，PhysX 模型总质量约 **19.842947 kg**。
 
-第一阶段对引导后仍无匹配参考的组合目标，以 80% 概率尝试降级。按各轴速度上限归一化排序，依次尝试保留最强两轴、最强单轴。找到匹配后，策略实际执行降级指令，AMP 也以该指令匹配参考。其余无匹配组合仍按原目标练速度跟踪和稳定性。
+> 这是训练代码与资产快照，当前有界试训属于 stage1。阶段二整机精度、实际 P95、静止峰峰值和模式切换仍未完成验收。阶段一检查点不能作为机械臂双模式策略已训练完成的依据。
 
-判别器使用跨 0.20 秒的三个状态，比较关节运动、根链接原点速度、机身高度、相对地面脚高和脚速。只有有参考覆盖且指令稳定的历史窗口参与 AMP。触地时根据实际腾空和抬脚幅度给有上限的奖励。PhysX 中足底球和小腿各有独立的接触信号，小腿碰撞会终止回合。机身低于 28.5 cm 时施加单边软惩罚。阶段一保持折叠臂姿态 `[0, 40, -3, 0, -32, 0]°`。阶段一达到全速度范围、15° 内部姿态指令范围且成功率 EMA ≥ 0.7 后，完整训练才进入底盘与机械臂联合优化。
+## 快速开始
 
-## 环境
-
-测试环境为 Linux、Python 3.11、Isaac Sim 5.1.0、Isaac Lab 0.54.3（提交 `47c9f95eeab90dc3611981d894d59f163191f5b1`）、PyTorch 2.7.0+cu128 与 RSL-RL 5.0.1。训练使用 NVIDIA GPU，CPU 可用于小规模检查和本地推理。预览面板需要图形会话、Tk 和 EGL。先按 Isaac Lab 文档安装仿真环境，再在同一个 Python 环境中安装项目依赖。 [Isaac Lab 安装文档](https://isaac-sim.github.io/IsaacLab/main/source/isaaclab/installation/index.html)
+在 Python 3.11、Isaac Sim 5.1 / Isaac Lab 环境中安装依赖。实际使用版本和安装边界见 [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)。
 
 ```bash
 git clone https://github.com/losehu/go2-arm.git
 cd go2-arm
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-preview.txt
+python scripts/verify_bundle.py --load-model
 ```
 
-## 准备模型资产
-
-需要已有的 `box_mount_rails_v9` 模型包，目录中包含 `robot/`、`path_bank.npz`、`whole_body_bank.npz`、`head_vertices.npy` 和 `controller_bench_report.json`。脚本核对 SHA-256 后把这些运行文件导入 `go2_arm/`。参考数据使用 17 条固定版本的 `amp_go2` 动作片段，优先从已有包读取，缺少时按固定提交下载。仅推理时可以加 `--skip-reference`。
+小规模启动检查：8 环境、4 更新，检查模型构建、PPO / AMP 更新及检查点重载。它只用于检查运行链路。
 
 ```bash
-python tools/prepare_assets.py --bundle /path/to/go2_piper_roboduet_amp
-python tools/split_foot_collisions.py --usd go2_arm/robot/usd/robot.usd --headless --device cpu
+python scripts/train.py --smoke --device cpu --num-envs 8 --updates 4 \
+  --run-dir runs/smoke_v11
 ```
 
-当前服务器配方使用 40 条自由底盘 PhysX 补录和 17 条上游参考，覆盖全部 27 种方向符号组合。用冻结的旧策略录制，右侧以镜像策略在物理仿真中独立重跑。部分补录用实际离地触发的教师抬脚辅助。筛选要求每只脚至少 3 次完整摆动、摆动峰值中位数至少 1.5 cm，且速度跟踪、对角支撑和防滑通过。最慢通过筛选的补录速度为 ±0.16 m/s，可用于匹配 ±0.12 m/s 指令。补录记录包含教师、参数和文件哈希。数据在本地准备，训练可读取原模型包中的补录目录，或通过 `--recordings` 导入：
+复现当前 **4096 环境、从零、20000 更新**有界试训：
 
 ```bash
-python tools/record_amp_clips.py --package go2_arm --headless --device cpu \
-  --checkpoint /path/to/phase_free_teacher.pt --output runs/recorded
-python tools/record_amp_clips.py --package go2_arm --headless --device cpu \
-  --checkpoint /path/to/phase_free_teacher.pt --output runs/recorded_slow --suite slow \
-  --lift-assist-mm 35 --assist-paired --front-lift-scale 1.35
-python tools/merge_amp_recordings.py --output runs/recorded_merged runs/recorded runs/recorded_slow
-python tools/prepare_assets.py --bundle /path/to/go2_piper_roboduet_amp --recordings runs/recorded_merged
-python tools/audit_amp_coverage.py
+python scripts/train.py --device cuda:0 --num-envs 4096 --updates 20000 \
+  --run-dir runs/v11_scratch_4096
 ```
 
-生成的 USD 层将原足底球移到独立刚体，小腿与足底合计的质量、质心和惯量保持一致。URDF 和 MuJoCo 视图资产仍来自原模型包。运行以下命令可分别验证脚底触地、小腿触地和同时触地。
+启动器在同一台机器上运行训练及独立 CPU 探针，记录退出码、进程身份和日志。训练结束核对 `model_19999.pt` 后，自动执行完整固定指令与两个种子的停车过渡测试。默认保持前台运行，可在自己的终端会话管理器中启动。
 
 ```bash
-python tools/verify_foot_contacts.py --package go2_arm --headless --device cpu
+python go2_arm/training_status.py runs/v11_scratch_4096
+tensorboard --logdir runs/v11_scratch_4096
 ```
 
-模型包包含有独立使用条款的相机支架。模型网格、生成的 USD、轨迹库、参考动作和训练权重由使用者在本地准备。具体版本与散列见 [asset_manifest.json](asset_manifest.json)，资产来源见 [THIRD_PARTY.md](THIRD_PARTY.md)。
+完整两阶段预算是 **40000 + 40000**；它与当前 20000 更新试训不同。若明确需要完整配方，可在启动器中指定 `--updates 80000`。阶段切换仍由原课程门槛控制，不能保证预算内一定进入或完成阶段二。恢复训练 CLI 当前主动拒绝执行，勿把新训练称为续训。
 
-## 从零训练
+## 查看权重
 
-先跑小规模短测，确认 AMP 判别器和 PPO 都能更新、保存并重载权重。
+将同版本检查点放入本地 `checkpoints/`；权重和运行日志不进入 Git 历史。
 
 ```bash
-python go2_arm/train_duet.py --headless --device cpu --num_envs 8 \
-  --amp --phase_free_amp --directional_amp --hip_splay_penalty --smoke \
-  --stop_after_updates 4 --run_dir runs/smoke
+python scripts/preview.py --checkpoint checkpoints/model_3000.pt
 ```
 
-复现当前第一阶段的 10,000 次无相位 AMP 试验。阶段一从 50% 速度范围起步，每 1,000 次保存，并在试验结束时保存 `model_9999.pt`。
+面板默认开放 `vx ±1.0 m/s`、`vy ±0.6 m/s`、`wz ±0.8 rad/s`，启动后为零指令，可直接查看静止落脚。动力学和策略由 PhysX 执行，MuJoCo 只渲染实际状态与双相机画面。碰撞或跌倒后暂停，需手动复位。机械臂目标需要阶段二检查点。
+
+## 独立测试
 
 ```bash
-python go2_arm/train_duet.py --headless --device cuda:0 --num_envs 4096 \
-  --amp --phase_free_amp --directional_amp --hip_splay_penalty \
-  --stop_after_updates 10000 --run_dir runs/amp_phase_free
-python go2_arm/training_status.py runs/amp_phase_free
-```
-
-完整双阶段训练省略 `--stop_after_updates`。默认阶段一和阶段二各有 40,000 次更新的预算，第二阶段由课程门槛控制。试验完成与整机验收是两个独立结果。
-
-## 本地交互推理
-
-用同一模型包生成的双策略 `.pt` 文件启动窗口。右侧 `vx / vy / wz` 滑块控制底盘，单位分别为 m/s、m/s、rad/s。三个分量分别在绝对值不超过 0.10 时清零。训练、推理和 AMP 方向分类使用同一死区。AMP 检查 0.20 秒窗口的每帧，跨方向类别或速度变化过大的窗口不参与风格匹配。启动时暂停，点「继续仿真」后调整速度。阶段一检查点用于行走，机械臂控制需要第二阶段检查点。
-
-```bash
-python go2_arm/launch_live_preview.py --checkpoint /path/to/model_4000.pt
-```
-
-Isaac/PhysX 计算动力学和策略动作。MuJoCo 根据实时状态渲染外部视角与双相机画面。启动器将状态和日志存到 `runs/previews/`。如果 Isaac 环境的 Tk 与系统 Tcl 冲突，可以通过 `--panel-python` 指向带 Tk、NumPy、MuJoCo 和 Pillow 的独立 Python 环境。Ubuntu 22.04 系统 Tcl/Tk 8.6 兼容配置如下。
-
-```bash
-export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libtcl8.6.so:/usr/lib/x86_64-linux-gnu/libtk8.6.so
-export TCL_LIBRARY=/usr/share/tcltk/tcl8.6
-export TK_LIBRARY=/usr/share/tcltk/tk8.6
-```
-
-固定速度诊断包含前后、左右、原地转向、斜移和带转向组合，并测试确定性动作与采样动作。按每只脚的实际离地与触地统计摆动次数、峰值、持续时间和拖脚比例，另记录支撑脚滑动、对角支撑和低机身时间。用重复的 `--case` 参数选择单独工况。
-
-```bash
+# 全范围固定指令：45 组 × 均值 / 采样策略
 python tools/direction_probe.py --package go2_arm --headless --device cpu \
-  --checkpoint /path/to/model_4000.pt --output runs/direction_probe
+  --checkpoint checkpoints/model_3000.pt --output runs/direction_probe
+
+# 18 项：move 0–6s → stop 6–14s → restart 14–18s → stop 18–24s
+python tools/stop_transition_probe.py --package go2_arm --headless --device cpu \
+  --checkpoint checkpoints/model_3000.pt --output runs/standing_seed61119 --seed 61119
+python tools/stop_transition_probe.py --package go2_arm --headless --device cpu \
+  --checkpoint checkpoints/model_3000.pt --output runs/standing_seed61120 --seed 61120
+
+# 按实际时间重算连续满 0.5s 的四脚接触，保留原始结果
+python scripts/analyze_settle.py --probe-dir runs/standing_seed61119
 ```
 
-## 代码入口
+探针输出目录必须是新目录。已有 `result.json` 的监督任务会跳过；不完整输出需要先查日志，启动器不会覆盖它重新运行。
 
-| 文件 | 用途 |
+## v11 配方要点
+
+- 动作幅度 hip / thigh / calf = `0.35 / 0.55 / 0.65 rad`，腿滤波 `alpha=0.35`。
+- 速度范围始终 `±1 / ±0.6 / ±0.8`。前 1000 更新以专家帧指令为主，随后 8000 更新连续增加全向比例至 80%，保留 20% 专家；固定扰动 `±0.15 / ±0.10 / ±0.15`，每 5 秒重采样。
+- 通过六方向高速门槛、全向比例和成功率条件后，内部姿态范围连续从 3° 扩至 15°。
+- 内收、站距和合格完整周期步频成本作用于正向 shaping 折扣；物理失败在 shaping 下限之后单次 `-5`，普通超时不罚。
+- 三轴速度指令全零时，静止项经过 0.25s 宽限和 0.50s 淡入，约束足底离地、近地法向力及每脚最低载荷份额。起步立即解除，不要求四脚均分载荷。
+- 折叠臂默认 `[0, 40, -3, 0, -32, 0]°`；完整机器人与碰撞保护保留。
+
+奖励阈值是训练设计；不能替代最终用户验收。详细边界与已有结果见 [docs/TRAINING.md](docs/TRAINING.md)。
+
+## 目录
+
+| 路径 | 内容 |
 | --- | --- |
-| `go2_arm/train_duet.py` | 双策略 PPO、阶段课程、AMP 奖励及检查点 |
-| `go2_arm/duet_env.py` | 自由底盘、观测、奖励和碰撞终止 |
-| `go2_arm/stage1_amp.py` | 基础 AMP 判别器和参考动作采样 |
-| `go2_arm/directional_amp.py` | 方向匹配的参考采样和实测运动历史 |
-| `go2_arm/air_time.py` | 基于实际腾空和触地的奖励 |
-| `go2_arm/live_controller.py` | 加载策略、执行指令并发布状态 |
-| `go2_arm/control_panel.py` | 速度滑块、机械臂控制、实时相机和外部视角 |
+| `go2_arm/train_duet.py` | 原版双策略 PPO / AMP 训练入口 |
+| `go2_arm/duet_env.py`, `base_env.py` | 观测、动作、奖励、机器人与物理终止 |
+| `go2_arm/standing_support.py`, `stance_cadence.py` | 静止承重、内收、站距与完整周期约束 |
+| `go2_arm/robot/` | 完整网格、URDF、MJCF、USD 及资产条款 |
+| `go2_arm/amp_reference/` | 57 条参考动作与来源 / 筛选清单 |
+| `scripts/train.py`, `watch_probes.py` | 可移植的监督启动与计划测试 |
+| `scripts/preview.py`, `full_range_panel.py` | 可移植的全速实时预览 |
+| `tools/` | 独立探针、录制、参考覆盖审计与资产工具 |
+| `asset_manifest.json` | 随仓库提供的数据文件 SHA-256 |
+| `provenance/` | 正式训练源码 / 资产哈希与环境快照 |
+
+训练 Python 和物理资产与导出时正式服务器版本逐字节一致；仅整理了路径元数据并新增可移植启动包装。`python scripts/verify_bundle.py` 会核对这些哈希。
+
+## 资产来源与发布
+
+第三方来源和原始条款见 [THIRD_PARTY.md](THIRD_PARTY.md) 与 `go2_arm/robot/licenses/`。相机支架来源中含明确标为 **Proprietary** 的资产；本快照没有为它们授予新的开源许可，也没有为整个混合包指定统一许可证。
+
+上传已有空仓库的命令见 [docs/GITHUB.md](docs/GITHUB.md)。运行数据、权重、机器连接信息和 SSH 凭据不属于此源码仓库。

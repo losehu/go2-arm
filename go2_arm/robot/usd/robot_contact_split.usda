@@ -1,0 +1,230 @@
+#usda 1.0
+(
+    defaultPrim = "go2_piper_folded_box_supported"
+    subLayers = [
+        @robot.usd@
+    ]
+)
+
+over "go2_piper_folded_box_supported"
+{
+    over "FL_calf" (
+        prepend apiSchemas = ["PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.007045521, -0.00067833194, -0.1349492)
+        float3 physics:diagonalInertia = (0.000047517064, 0.0013481869, 0.0013729763)
+        float physics:mass = 0.22135201
+        quatf physics:principalAxes = (0.49875587, 0.5084434, 0.4957989, -0.49690175)
+
+        over "collisions" (
+            instanceable = false
+        )
+        {
+            over "FL_calf_collision_19"
+            {
+                over "sphere"
+                {
+                    bool physics:collisionEnabled = 0
+                }
+            }
+        }
+    }
+
+    def Xform "FL_foot_contact" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0, 0, 0)
+        float3 physics:diagonalInertia = (0.000003872, 0.000003872, 0.000003872)
+        float physics:mass = 0.02
+        quatf physics:principalAxes = (1, 0, 0, 0)
+        matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.19139999547041953, 0.1420000046491623, -0.4259999990463257, 1) )
+        uniform token[] xformOpOrder = ["xformOp:transform"]
+
+        def Sphere "sphere" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token purpose = "guide"
+            double radius = 0.02199999988079071
+        }
+    }
+
+    over "joints"
+    {
+        def PhysicsFixedJoint "FL_foot_contact_joint"
+        {
+            rel physics:body0 = </go2_piper_folded_box_supported/FL_calf>
+            rel physics:body1 = </go2_piper_folded_box_supported/FL_foot_contact>
+            bool physics:collisionEnabled = 0
+            point3f physics:localPos0 = (-0.002, 0, -0.213)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+        }
+
+        def PhysicsFixedJoint "FR_foot_contact_joint"
+        {
+            rel physics:body0 = </go2_piper_folded_box_supported/FR_calf>
+            rel physics:body1 = </go2_piper_folded_box_supported/FR_foot_contact>
+            bool physics:collisionEnabled = 0
+            point3f physics:localPos0 = (-0.002, 0, -0.213)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+        }
+
+        def PhysicsFixedJoint "RL_foot_contact_joint"
+        {
+            rel physics:body0 = </go2_piper_folded_box_supported/RL_calf>
+            rel physics:body1 = </go2_piper_folded_box_supported/RL_foot_contact>
+            bool physics:collisionEnabled = 0
+            point3f physics:localPos0 = (-0.002, 0, -0.213)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+        }
+
+        def PhysicsFixedJoint "RR_foot_contact_joint"
+        {
+            rel physics:body0 = </go2_piper_folded_box_supported/RR_calf>
+            rel physics:body1 = </go2_piper_folded_box_supported/RR_foot_contact>
+            bool physics:collisionEnabled = 0
+            point3f physics:localPos0 = (-0.002, 0, -0.213)
+            point3f physics:localPos1 = (0, 0, 0)
+            quatf physics:localRot0 = (1, 0, 0, 0)
+            quatf physics:localRot1 = (1, 0, 0, 0)
+        }
+    }
+
+    over "FR_calf" (
+        prepend apiSchemas = ["PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.007045521, 0.00067833194, -0.1349492)
+        float3 physics:diagonalInertia = (0.000047517064, 0.0013481869, 0.0013729763)
+        float physics:mass = 0.22135201
+        quatf physics:principalAxes = (0.5084434, 0.49875587, 0.49690175, -0.4957989)
+
+        over "collisions" (
+            instanceable = false
+        )
+        {
+            over "FR_calf_collision_31"
+            {
+                over "sphere"
+                {
+                    bool physics:collisionEnabled = 0
+                }
+            }
+        }
+    }
+
+    def Xform "FR_foot_contact" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0, 0, 0)
+        float3 physics:diagonalInertia = (0.000003872, 0.000003872, 0.000003872)
+        float physics:mass = 0.02
+        quatf physics:principalAxes = (1, 0, 0, 0)
+        matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0.19139999547041953, -0.1420000046491623, -0.4259999990463257, 1) )
+        uniform token[] xformOpOrder = ["xformOp:transform"]
+
+        def Sphere "sphere" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token purpose = "guide"
+            double radius = 0.02199999988079071
+        }
+    }
+
+    over "RL_calf" (
+        prepend apiSchemas = ["PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.007045521, -0.00067833194, -0.1349492)
+        float3 physics:diagonalInertia = (0.000047517064, 0.0013481869, 0.0013729763)
+        float physics:mass = 0.22135201
+        quatf physics:principalAxes = (0.49875587, 0.5084434, 0.4957989, -0.49690175)
+
+        over "collisions" (
+            instanceable = false
+        )
+        {
+            over "RL_calf_collision_43"
+            {
+                over "sphere"
+                {
+                    bool physics:collisionEnabled = 0
+                }
+            }
+        }
+    }
+
+    def Xform "RL_foot_contact" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0, 0, 0)
+        float3 physics:diagonalInertia = (0.000003872, 0.000003872, 0.000003872)
+        float physics:mass = 0.02
+        quatf physics:principalAxes = (1, 0, 0, 0)
+        matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.19539999566040933, 0.1420000046491623, -0.4259999990463257, 1) )
+        uniform token[] xformOpOrder = ["xformOp:transform"]
+
+        def Sphere "sphere" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token purpose = "guide"
+            double radius = 0.02199999988079071
+        }
+    }
+
+    over "RR_calf" (
+        prepend apiSchemas = ["PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0.007045521, 0.00067833194, -0.1349492)
+        float3 physics:diagonalInertia = (0.000047517064, 0.0013481869, 0.0013729763)
+        float physics:mass = 0.22135201
+        quatf physics:principalAxes = (0.5084434, 0.49875587, 0.49690175, -0.4957989)
+
+        over "collisions" (
+            instanceable = false
+        )
+        {
+            over "RR_calf_collision_55"
+            {
+                over "sphere"
+                {
+                    bool physics:collisionEnabled = 0
+                }
+            }
+        }
+    }
+
+    def Xform "RR_foot_contact" (
+        prepend apiSchemas = ["PhysicsRigidBodyAPI", "PhysicsMassAPI"]
+    )
+    {
+        point3f physics:centerOfMass = (0, 0, 0)
+        float3 physics:diagonalInertia = (0.000003872, 0.000003872, 0.000003872)
+        float physics:mass = 0.02
+        quatf physics:principalAxes = (1, 0, 0, 0)
+        matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (-0.19539999566040933, -0.1420000046491623, -0.4259999990463257, 1) )
+        uniform token[] xformOpOrder = ["xformOp:transform"]
+
+        def Sphere "sphere" (
+            prepend apiSchemas = ["PhysicsCollisionAPI"]
+        )
+        {
+            uniform token purpose = "guide"
+            double radius = 0.02199999988079071
+        }
+    }
+}
+

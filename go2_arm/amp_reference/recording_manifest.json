@@ -1,0 +1,3013 @@
+{
+  "source": "fixed_command_free_base_physx_policy_recording",
+  "linear_velocity_frame": "root_link",
+  "swing_quality_revision": "measured_swing_v1",
+  "clips": [
+    {
+      "file": "go2_recorded_forward_diagonal_turn_1_left.txt",
+      "sha256": "2ff429d689d45e61b7a5bd3696b8c79143b4315fdbd7355e13805070c4dbba9a",
+      "command": [
+        0.65,
+        0.11,
+        0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_turn_1_right.txt",
+      "sha256": "9d57cf538ea8fde59dc66f9b15f1d24ff1f98a53e60d1970b0a4e88067b71729",
+      "command": [
+        0.65,
+        -0.11,
+        -0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_counterturn_1_left.txt",
+      "sha256": "7fbd9995f11348de5c5d6fcaef680d89891cdb4187144c8e27a4f6667904b588",
+      "command": [
+        0.65,
+        0.11,
+        -0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_counterturn_1_right.txt",
+      "sha256": "78530e6c06ceab9d345cd25d74e7cc50a591f0b3a35c65a50da3387f7a6030c3",
+      "command": [
+        0.65,
+        -0.11,
+        0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_turn_2_left.txt",
+      "sha256": "28746735956ce8ce3fd565a77673c6a68c797e73aac54cb38dfd4fc82ef3d94b",
+      "command": [
+        0.18,
+        0.37,
+        0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_turn_2_right.txt",
+      "sha256": "075497049ff39fb034710bbe65871b4cb1d508e8974c33e1505230ca004188a0",
+      "command": [
+        0.18,
+        -0.37,
+        -0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_turn_3_left.txt",
+      "sha256": "688c23e43b696ee3ac0ab91b411f392181c33c861c30069d2e7eb361cfcd5273",
+      "command": [
+        0.17,
+        0.11,
+        0.53
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_turn_3_right.txt",
+      "sha256": "d231a00c641e36ec70260818f8bcb11d8e8f8c14b41a8c666cb51b13886bfd16",
+      "command": [
+        0.17,
+        -0.11,
+        -0.53
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_1_left.txt",
+      "sha256": "cfdc94b411bd7e0e921fac070e219882de3c8353857dc44563ff1d731d64c8e1",
+      "command": [
+        0.65,
+        0.11,
+        0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_1_right.txt",
+      "sha256": "1e545593e94241f509c2ddccacacd61be2d2e3fcc017ca0e9a45ec8db0474ed9",
+      "command": [
+        0.65,
+        -0.11,
+        -0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_2_left.txt",
+      "sha256": "7e4130bbae649d57f96cc17c8d5b58d087cccb868db3d3021bb1291f7f9c8146",
+      "command": [
+        0.18,
+        0.37,
+        0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_2_right.txt",
+      "sha256": "f1adc936d67cbdac7574a167fffba3a2eef9d6343cc1591e62d56d0a72e57777",
+      "command": [
+        0.18,
+        -0.37,
+        -0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_backward_diagonal_turn_0_left.txt",
+      "sha256": "a6ed6aea010a30556ba3893510485885e9ea5ed7cc02341eb346fdf61cd14e14",
+      "command": [
+        -0.25,
+        0.15,
+        0.2
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_backward_diagonal_turn_0_right.txt",
+      "sha256": "fa547958ee6eeed8ce5e6224820669400cbf3a0f61e1918a46e41e7d1005ca3e",
+      "command": [
+        -0.25,
+        -0.15,
+        -0.2
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_backward_diagonal_counterturn_0_left.txt",
+      "sha256": "6727f4a3a64fcfd7442fbc8b2ba6574a089a7d4bb64aec5d9d6e30abe6e77f91",
+      "command": [
+        -0.25,
+        0.15,
+        -0.2
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_backward_diagonal_counterturn_0_right.txt",
+      "sha256": "25c1c4cb4624fe3869bcec5752f1c8ead23a2d2b6870d1261b31baac8720638c",
+      "command": [
+        -0.25,
+        -0.15,
+        0.2
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_backward_diagonal_0_left.txt",
+      "sha256": "cfc50be6e6c4544568bb1aef84f5c85ed2fda9abc60444d3ec569e403d56bc0b",
+      "command": [
+        -0.25,
+        0.15,
+        0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_backward_diagonal_0_right.txt",
+      "sha256": "d11c4b067571d1afa9daadd010cecde725f3e8983a5090dcd61e8134fa1d1411",
+      "command": [
+        -0.25,
+        -0.15,
+        -0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_backward_turn_0_left.txt",
+      "sha256": "fca23e74a629656f06c146d23e2793b558ae26f1e3dc3fa0123762dd2d122079",
+      "command": [
+        -0.3,
+        0.0,
+        0.25
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_backward_turn_0_right.txt",
+      "sha256": "caad59e0e18765001b4a21bc68a4e5690db4f768266e6569523805db96acaea9",
+      "command": [
+        -0.3,
+        -0.0,
+        -0.25
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_lateral_counterturn_1_left.txt",
+      "sha256": "1acc62db87693d98ab03b03971e1642defb2fa178bc703c27656bc0816360f12",
+      "command": [
+        0.0,
+        0.37,
+        -0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_lateral_counterturn_1_right.txt",
+      "sha256": "1f4d90cc28184632c9afebce5edebd03c32a9b602781a68edf240823c9736d16",
+      "command": [
+        0.0,
+        -0.37,
+        0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_lateral_turn_2_left.txt",
+      "sha256": "e99d142ed10a50e79b7c6c3e242d7c2dc2fa04a27b64da626b0235d6a7de0e4e",
+      "command": [
+        0.0,
+        0.1,
+        0.53
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_lateral_turn_2_right.txt",
+      "sha256": "bb61c4ea6eb0f1faf4950a859ce1a11f411a829be25ab5f7f12832cf7e579ffb",
+      "command": [
+        0.0,
+        -0.1,
+        -0.53
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 0.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_bridge_left.txt",
+      "sha256": "2c6948a0eaa7c65242668bbe140e4b848fb365b11e1ffada00b4f80f02e6e473",
+      "command": [
+        0.55,
+        0.25,
+        0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 25.0,
+      "teacher_assist_paired": true,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_diagonal_bridge_right.txt",
+      "sha256": "e46927e6392f67fe7eb3ebb7e34629bd04710b75ee254a535c982daadc2e53dc",
+      "command": [
+        0.55,
+        -0.25,
+        -0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 25.0,
+      "teacher_assist_paired": true,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_lateral_turn_1_left.txt",
+      "sha256": "d155f930339fbf9bce5f3b6f72056d080840a78055cc3a9e3e8336ed1d92d699",
+      "command": [
+        0.0,
+        0.37,
+        0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 25.0,
+      "teacher_assist_paired": true,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_lateral_turn_1_right.txt",
+      "sha256": "7621fdfdcb53609fe895e6c8c9d89ffad113085488a0202a43c37329ef860c2e",
+      "command": [
+        0.0,
+        -0.37,
+        -0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 25.0,
+      "teacher_assist_paired": true,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_turn_1_left.txt",
+      "sha256": "6c8e2e5f3166f50836d1a5505cfde26c91dd90ceca6b5db57335afeb39d5bc87",
+      "command": [
+        0.65,
+        0.0,
+        0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_forward_turn_1_right.txt",
+      "sha256": "6a9fea7a1223b021a9a60aaf67fae02b731285d5cd2b43d17bfd65fd04193934",
+      "command": [
+        0.65,
+        -0.0,
+        -0.14
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_backward_turn_2_left.txt",
+      "sha256": "d04fc7c45fc575aa6a398a933193fd462c6c707f83299ae5395485591cc78240",
+      "command": [
+        -0.17,
+        0.0,
+        0.53
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_backward_turn_2_right.txt",
+      "sha256": "e7bcd261d3977a3b133535b7d7f42038aa861dbb43d7ebcc2b16c7ae8d6fa9d3",
+      "command": [
+        -0.17,
+        -0.0,
+        -0.53
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_lateral_turn_0_left.txt",
+      "sha256": "64d8db9a3ac6bc4e1e22a48768c74a023c12b1384d33b26e8ce69d6eeb4fedb1",
+      "command": [
+        0.0,
+        0.23,
+        0.2
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_lateral_turn_0_right.txt",
+      "sha256": "2014b501fb4fc48c36d5651dae7f14fb2fd25a4496552f63fda4c2ce50ddd612",
+      "command": [
+        0.0,
+        -0.23,
+        -0.2
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": false,
+      "teacher_front_lift_scale": 1.0
+    },
+    {
+      "file": "go2_recorded_slow_lateral_16_left.txt",
+      "sha256": "01698e0dc5435af63bc65fbbc6e2f402a806c7dc91f728dfd7e581c9463c2865",
+      "command": [
+        0.0,
+        0.16,
+        0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": true,
+      "teacher_front_lift_scale": 1.35
+    },
+    {
+      "file": "go2_recorded_slow_lateral_16_right.txt",
+      "sha256": "395b927918e410c6cd58c24a678bd6e89e4f3f88859e910bf33299f5907967a3",
+      "command": [
+        0.0,
+        -0.16,
+        -0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": true,
+      "teacher_front_lift_scale": 1.35
+    },
+    {
+      "file": "go2_recorded_slow_lateral_18_left.txt",
+      "sha256": "7fe63d9b1fd52d2f44ab91c6e38256f5e8861893c588f4456ff207d09111f626",
+      "command": [
+        0.0,
+        0.18,
+        0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": true,
+      "teacher_front_lift_scale": 1.35
+    },
+    {
+      "file": "go2_recorded_slow_lateral_18_right.txt",
+      "sha256": "351d0e7c8c2c1c9905c973dbf64b2b765a8c2ae3b52094466e9bef482ef78202",
+      "command": [
+        0.0,
+        -0.18,
+        -0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": true,
+      "teacher_front_lift_scale": 1.35
+    },
+    {
+      "file": "go2_recorded_slow_lateral_20_left.txt",
+      "sha256": "80a2ab7e1cd9f7e7a5c8faf93795c3f329b2b033bfd6c28fb40fb2c0148478ba",
+      "command": [
+        0.0,
+        0.2,
+        0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": true,
+      "teacher_front_lift_scale": 1.35
+    },
+    {
+      "file": "go2_recorded_slow_lateral_20_right.txt",
+      "sha256": "7386d196d731a6340325e6f70e7f39494c494eb9bbd63eaa6704b71a988f5efb",
+      "command": [
+        0.0,
+        -0.2,
+        -0.0
+      ],
+      "teacher_checkpoint_sha256": "fa397b48b81e75494345b8023248d1020ce93cb705bc11d9a902759f103f8e5a",
+      "teacher_lift_assist_mm": 35.0,
+      "teacher_assist_paired": true,
+      "teacher_front_lift_scale": 1.35
+    }
+  ],
+  "results": {
+    "forward_diagonal_turn_1_left": {
+      "command": [
+        0.65,
+        0.11,
+        0.14
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.01887393867283558,
+        0.007155772479563671,
+        0.031531491858686665
+      ],
+      "clearance_p95_m": [
+        0.01938507631421089,
+        0.023750580847263336,
+        0.01703128255903721,
+        0.023165494948625565
+      ],
+      "exclusive_diagonal": 0.5566666666666666,
+      "slip": 0.05216284987277354,
+      "swing_count": [
+        12,
+        12,
+        12,
+        11
+      ],
+      "swing_peak_median_m": [
+        0.02233000472187996,
+        0.025590993463993073,
+        0.01922735571861267,
+        0.02490195631980896
+      ],
+      "swing_duration_median_s": [
+        0.12,
+        0.16,
+        0.22,
+        0.2
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.4583333333333333,
+        0.34065934065934067,
+        0.5118110236220472,
+        0.26666666666666666
+      ],
+      "airborne_fraction": [
+        0.25333333333333335,
+        0.30333333333333334,
+        0.42333333333333334,
+        0.4
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_turn_1_right": {
+      "command": [
+        0.65,
+        -0.11,
+        -0.14
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.01858623322103491,
+        0.007574289212014716,
+        0.03241940021561303
+      ],
+      "clearance_p95_m": [
+        0.024519006535410885,
+        0.020613407716155056,
+        0.02385549619793892,
+        0.017118726298213004
+      ],
+      "exclusive_diagonal": 0.56,
+      "slip": 0.05370843989769821,
+      "swing_count": [
+        12,
+        12,
+        11,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.02619732916355133,
+        0.024533875286579132,
+        0.025671787559986115,
+        0.01925792172551155
+      ],
+      "swing_duration_median_s": [
+        0.16,
+        0.12,
+        0.2,
+        0.22
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.3854166666666667,
+        0.5,
+        0.30275229357798167,
+        0.6046511627906976
+      ],
+      "airborne_fraction": [
+        0.32,
+        0.24,
+        0.4033333333333333,
+        0.43
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_counterturn_1_left": {
+      "command": [
+        0.65,
+        0.11,
+        -0.14
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.018236931515371653,
+        0.011698826006008757,
+        0.0264744740101056
+      ],
+      "clearance_p95_m": [
+        0.018333929777145385,
+        0.024255433306097984,
+        0.019657444208860397,
+        0.022764065489172938
+      ],
+      "exclusive_diagonal": 0.5366666666666666,
+      "slip": 0.04556962025316456,
+      "swing_count": [
+        12,
+        12,
+        11,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.019602131098508835,
+        0.025059524923563004,
+        0.02156893163919449,
+        0.024750277400016785
+      ],
+      "swing_duration_median_s": [
+        0.12,
+        0.15,
+        0.2,
+        0.2
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.40298507462686567,
+        0.3888888888888889,
+        0.6140350877192983,
+        0.3025210084033613
+      ],
+      "airborne_fraction": [
+        0.22333333333333333,
+        0.31333333333333335,
+        0.43333333333333335,
+        0.39666666666666667
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_counterturn_1_right": {
+      "command": [
+        0.65,
+        -0.11,
+        0.14
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.018415349657482875,
+        0.011755335857096979,
+        0.027963254247853665
+      ],
+      "clearance_p95_m": [
+        0.024686139076948166,
+        0.018520360812544823,
+        0.022689535468816757,
+        0.019430467486381532
+      ],
+      "exclusive_diagonal": 0.5366666666666666,
+      "slip": 0.04430379746835443,
+      "swing_count": [
+        12,
+        12,
+        12,
+        11
+      ],
+      "swing_peak_median_m": [
+        0.02500399574637413,
+        0.019561413675546646,
+        0.024350326508283615,
+        0.021666131913661957
+      ],
+      "swing_duration_median_s": [
+        0.14,
+        0.12,
+        0.2,
+        0.22
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.375,
+        0.43478260869565216,
+        0.2905982905982906,
+        0.6293103448275862
+      ],
+      "airborne_fraction": [
+        0.30666666666666664,
+        0.23,
+        0.39,
+        0.44
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_turn_2_left": {
+      "command": [
+        0.18,
+        0.37,
+        0.14
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.007917852061286496,
+        0.021310786100022863,
+        0.02373977592429057
+      ],
+      "clearance_p95_m": [
+        0.02157593294978142,
+        0.02749515101313591,
+        0.016852576285600662,
+        0.023001137003302575
+      ],
+      "exclusive_diagonal": 0.44666666666666666,
+      "slip": 0.026634382566585957,
+      "swing_count": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.023108527064323425,
+        0.02760433405637741,
+        0.018094182014465332,
+        0.02417619153857231
+      ],
+      "swing_duration_median_s": [
+        0.12,
+        0.16,
+        0.12,
+        0.21
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.36,
+        0.29473684210526313,
+        0.5,
+        0.23809523809523808
+      ],
+      "airborne_fraction": [
+        0.25333333333333335,
+        0.32,
+        0.24666666666666667,
+        0.4266666666666667
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_turn_2_right": {
+      "command": [
+        0.18,
+        -0.37,
+        -0.14
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.0081081039440806,
+        0.02153392832235562,
+        0.024892784882169602
+      ],
+      "clearance_p95_m": [
+        0.02673144042491913,
+        0.021640458703041078,
+        0.022862768918275832,
+        0.0167878195643425
+      ],
+      "exclusive_diagonal": 0.45,
+      "slip": 0.025423728813559324,
+      "swing_count": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.027759604156017303,
+        0.023572683334350586,
+        0.024106863886117935,
+        0.0178876593708992
+      ],
+      "swing_duration_median_s": [
+        0.16,
+        0.12,
+        0.21,
+        0.12
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.30526315789473685,
+        0.35135135135135137,
+        0.24603174603174602,
+        0.4931506849315068
+      ],
+      "airborne_fraction": [
+        0.32,
+        0.25,
+        0.4266666666666667,
+        0.25
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_turn_3_left": {
+      "command": [
+        0.17,
+        0.11,
+        0.53
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.008530982133230216,
+        0.013294674245908938,
+        0.02014436256738141
+      ],
+      "clearance_p95_m": [
+        0.015968254953622817,
+        0.02277586720883847,
+        0.02195492647588253,
+        0.014947697520256042
+      ],
+      "exclusive_diagonal": 0.46,
+      "slip": 0.027939464493597205,
+      "swing_count": [
+        12,
+        11,
+        11,
+        11
+      ],
+      "swing_peak_median_m": [
+        0.01625155657529831,
+        0.02664199471473694,
+        0.023620903491973877,
+        0.015391819179058075
+      ],
+      "swing_duration_median_s": [
+        0.1,
+        0.14,
+        0.18,
+        0.16
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.4098360655737705,
+        0.4868421052631579,
+        0.3431372549019608,
+        0.43478260869565216
+      ],
+      "airborne_fraction": [
+        0.20333333333333334,
+        0.25666666666666665,
+        0.35,
+        0.32666666666666666
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_turn_3_right": {
+      "command": [
+        0.17,
+        -0.11,
+        -0.53
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.00863854557372514,
+        0.013291104983461905,
+        0.020498474905209438
+      ],
+      "clearance_p95_m": [
+        0.023506092280149462,
+        0.01595464497804642,
+        0.015073955059051514,
+        0.02278616987168789
+      ],
+      "exclusive_diagonal": 0.4666666666666667,
+      "slip": 0.022222222222222223,
+      "swing_count": [
+        11,
+        11,
+        11,
+        11
+      ],
+      "swing_peak_median_m": [
+        0.026938579976558685,
+        0.01674775779247284,
+        0.015550367534160614,
+        0.023706160485744476
+      ],
+      "swing_duration_median_s": [
+        0.14,
+        0.1,
+        0.18,
+        0.18
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.4666666666666667,
+        0.43333333333333335,
+        0.425531914893617,
+        0.34615384615384615
+      ],
+      "airborne_fraction": [
+        0.25,
+        0.21666666666666667,
+        0.33,
+        0.35333333333333333
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_1_left": {
+      "command": [
+        0.65,
+        0.11,
+        0.0
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.01853567665739709,
+        0.008570556985968534,
+        0.024256189262126814
+      ],
+      "clearance_p95_m": [
+        0.017085381597280506,
+        0.024841641634702684,
+        0.01741047352552414,
+        0.022368580847978596
+      ],
+      "exclusive_diagonal": 0.53,
+      "slip": 0.03638644918444166,
+      "swing_count": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.020315535366535187,
+        0.025653548538684845,
+        0.019872210919857025,
+        0.024037141352891922
+      ],
+      "swing_duration_median_s": [
+        0.12,
+        0.14,
+        0.2,
+        0.19
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.5142857142857142,
+        0.32954545454545453,
+        0.576,
+        0.2982456140350877
+      ],
+      "airborne_fraction": [
+        0.23333333333333334,
+        0.2966666666666667,
+        0.4266666666666667,
+        0.38666666666666666
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_1_right": {
+      "command": [
+        0.65,
+        -0.11,
+        -0.0
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.01864081939016585,
+        0.008458967880508298,
+        0.024732026819226184
+      ],
+      "clearance_p95_m": [
+        0.0249674815684557,
+        0.017324326559901244,
+        0.02237508818507195,
+        0.017383741587400435
+      ],
+      "exclusive_diagonal": 0.5333333333333333,
+      "slip": 0.038944723618090454,
+      "swing_count": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.025680579245090485,
+        0.020197290927171707,
+        0.023533247411251068,
+        0.019866090267896652
+      ],
+      "swing_duration_median_s": [
+        0.14,
+        0.12,
+        0.2,
+        0.2
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.3258426966292135,
+        0.5428571428571428,
+        0.30434782608695654,
+        0.536
+      ],
+      "airborne_fraction": [
+        0.3,
+        0.23333333333333334,
+        0.38666666666666666,
+        0.4266666666666667
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_2_left": {
+      "command": [
+        0.18,
+        0.37,
+        0.0
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.00807260903109985,
+        0.021234986078790284,
+        0.029165129268181007
+      ],
+      "clearance_p95_m": [
+        0.015145888924598696,
+        0.030371228605508806,
+        0.01982180178165436,
+        0.024915178492665294
+      ],
+      "exclusive_diagonal": 0.41333333333333333,
+      "slip": 0.04106280193236715,
+      "swing_count": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.016194768249988556,
+        0.031061328947544098,
+        0.021332822740077972,
+        0.02548077702522278
+      ],
+      "swing_duration_median_s": [
+        0.1,
+        0.16,
+        0.12,
+        0.22
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.5396825396825397,
+        0.29473684210526313,
+        0.4266666666666667,
+        0.22388059701492538
+      ],
+      "airborne_fraction": [
+        0.21,
+        0.3233333333333333,
+        0.26,
+        0.44666666666666666
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_2_right": {
+      "command": [
+        0.18,
+        -0.37,
+        -0.0
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.0077457362408542,
+        0.021128442181116435,
+        0.028582363883871902
+      ],
+      "clearance_p95_m": [
+        0.02976311817765236,
+        0.01585569679737091,
+        0.02503096088767052,
+        0.019935090094804764
+      ],
+      "exclusive_diagonal": 0.4166666666666667,
+      "slip": 0.04,
+      "swing_count": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.031384967267513275,
+        0.01695340871810913,
+        0.025497816503047943,
+        0.02115791290998459
+      ],
+      "swing_duration_median_s": [
+        0.16,
+        0.1,
+        0.22,
+        0.12
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.29473684210526313,
+        0.46875,
+        0.23880597014925373,
+        0.42105263157894735
+      ],
+      "airborne_fraction": [
+        0.3233333333333333,
+        0.21333333333333335,
+        0.44666666666666666,
+        0.26666666666666666
+      ],
+      "feet_without_completed_swing": []
+    },
+    "backward_diagonal_turn_0_left": {
+      "command": [
+        -0.25,
+        0.15,
+        0.2
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.011164619965481395,
+        0.012455263488776312,
+        0.021623208190909234
+      ],
+      "clearance_p95_m": [
+        0.025158808007836344,
+        0.019374441355466843,
+        0.017939575761556626,
+        0.023319344222545623
+      ],
+      "exclusive_diagonal": 0.5366666666666666,
+      "slip": 0.03855721393034826,
+      "swing_count": [
+        10,
+        10,
+        10,
+        10
+      ],
+      "swing_peak_median_m": [
+        0.025991346687078476,
+        0.020236436277627945,
+        0.0197957381606102,
+        0.02395351231098175
+      ],
+      "swing_duration_median_s": [
+        0.18,
+        0.2,
+        0.14,
+        0.22
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.30434782608695654,
+        0.21153846153846154,
+        0.4626865671641791,
+        0.2767857142857143
+      ],
+      "airborne_fraction": [
+        0.32,
+        0.37333333333333335,
+        0.24,
+        0.38666666666666666
+      ],
+      "feet_without_completed_swing": []
+    },
+    "backward_diagonal_turn_0_right": {
+      "command": [
+        -0.25,
+        -0.15,
+        -0.2
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.011354257847988915,
+        0.012359978617193923,
+        0.02269101797303949
+      ],
+      "clearance_p95_m": [
+        0.01937140077352524,
+        0.0252433430403471,
+        0.02332383245229721,
+        0.01852630451321602
+      ],
+      "exclusive_diagonal": 0.53,
+      "slip": 0.04326328800988875,
+      "swing_count": [
+        10,
+        10,
+        10,
+        10
+      ],
+      "swing_peak_median_m": [
+        0.020773950964212418,
+        0.026028167456388474,
+        0.023620419204235077,
+        0.019933104515075684
+      ],
+      "swing_duration_median_s": [
+        0.2,
+        0.18,
+        0.22,
+        0.14
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.18627450980392157,
+        0.27472527472527475,
+        0.2727272727272727,
+        0.4393939393939394
+      ],
+      "airborne_fraction": [
+        0.36333333333333334,
+        0.32,
+        0.38333333333333336,
+        0.23666666666666666
+      ],
+      "feet_without_completed_swing": []
+    },
+    "backward_diagonal_counterturn_0_left": {
+      "command": [
+        -0.25,
+        0.15,
+        -0.2
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.012466908911488076,
+        0.012669458865360117,
+        0.02510194637140844
+      ],
+      "clearance_p95_m": [
+        0.017342229560017585,
+        0.019632548838853837,
+        0.021800769120454793,
+        0.022101884335279466
+      ],
+      "exclusive_diagonal": 0.57,
+      "slip": 0.036848792884371026,
+      "swing_count": [
+        10,
+        10,
+        10,
+        10
+      ],
+      "swing_peak_median_m": [
+        0.018374506384134293,
+        0.02088186889886856,
+        0.02343602478504181,
+        0.022677086293697357
+      ],
+      "swing_duration_median_s": [
+        0.16,
+        0.22,
+        0.14,
+        0.24
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.4166666666666667,
+        0.2616822429906542,
+        0.3287671232876712,
+        0.2796610169491525
+      ],
+      "airborne_fraction": [
+        0.30333333333333334,
+        0.38666666666666666,
+        0.26666666666666666,
+        0.42
+      ],
+      "feet_without_completed_swing": []
+    },
+    "backward_diagonal_counterturn_0_right": {
+      "command": [
+        -0.25,
+        -0.15,
+        0.2
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.012494612649633696,
+        0.012818792841305835,
+        0.024881172447783307
+      ],
+      "clearance_p95_m": [
+        0.019824186339974403,
+        0.017166904732584955,
+        0.021562572568655014,
+        0.021735162287950516
+      ],
+      "exclusive_diagonal": 0.57,
+      "slip": 0.036755386565272496,
+      "swing_count": [
+        10,
+        10,
+        10,
+        10
+      ],
+      "swing_peak_median_m": [
+        0.021020561456680298,
+        0.01844577118754387,
+        0.022369593381881714,
+        0.02353842556476593
+      ],
+      "swing_duration_median_s": [
+        0.21,
+        0.16,
+        0.24,
+        0.14
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.23809523809523808,
+        0.42857142857142855,
+        0.2796610169491525,
+        0.3287671232876712
+      ],
+      "airborne_fraction": [
+        0.38,
+        0.30333333333333334,
+        0.42,
+        0.26666666666666666
+      ],
+      "feet_without_completed_swing": []
+    },
+    "backward_diagonal_0_left": {
+      "command": [
+        -0.25,
+        0.15,
+        0.0
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.011104215437395948,
+        0.011459629035470471,
+        0.02270040995422395
+      ],
+      "clearance_p95_m": [
+        0.019181723147630694,
+        0.01770634911954403,
+        0.021472886949777604,
+        0.022326377034187318
+      ],
+      "exclusive_diagonal": 0.5366666666666666,
+      "slip": 0.043532338308457715,
+      "swing_count": [
+        10,
+        11,
+        11,
+        10
+      ],
+      "swing_peak_median_m": [
+        0.020196732133626938,
+        0.018416501581668854,
+        0.02283938229084015,
+        0.02286984771490097
+      ],
+      "swing_duration_median_s": [
+        0.18,
+        0.2,
+        0.14,
+        0.22
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.4444444444444444,
+        0.2,
+        0.42857142857142855,
+        0.2727272727272727
+      ],
+      "airborne_fraction": [
+        0.31666666666666665,
+        0.36666666666666664,
+        0.25666666666666665,
+        0.38
+      ],
+      "feet_without_completed_swing": []
+    },
+    "backward_diagonal_0_right": {
+      "command": [
+        -0.25,
+        -0.15,
+        -0.0
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.011338406963928583,
+        0.01137776789784102,
+        0.021923508247118806
+      ],
+      "clearance_p95_m": [
+        0.017783432081341744,
+        0.019432683661580085,
+        0.022255898267030717,
+        0.021537920832633974
+      ],
+      "exclusive_diagonal": 0.5366666666666666,
+      "slip": 0.04477611940298507,
+      "swing_count": [
+        11,
+        10,
+        10,
+        11
+      ],
+      "swing_peak_median_m": [
+        0.018509656190872192,
+        0.020335759967565536,
+        0.022900089621543884,
+        0.022882923483848572
+      ],
+      "swing_duration_median_s": [
+        0.2,
+        0.18,
+        0.22,
+        0.14
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.2072072072072072,
+        0.43820224719101125,
+        0.2727272727272727,
+        0.42857142857142855
+      ],
+      "airborne_fraction": [
+        0.37,
+        0.31333333333333335,
+        0.38,
+        0.25666666666666665
+      ],
+      "feet_without_completed_swing": []
+    },
+    "backward_turn_0_left": {
+      "command": [
+        -0.3,
+        0.0,
+        0.25
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.018939751363445292,
+        0.00895339414624041,
+        0.02553128084689469
+      ],
+      "clearance_p95_m": [
+        0.03146066963672638,
+        0.01967240236699581,
+        0.02895533367991448,
+        0.03136977776885033
+      ],
+      "exclusive_diagonal": 0.6733333333333333,
+      "slip": 0.023225806451612905,
+      "swing_count": [
+        9,
+        10,
+        10,
+        9
+      ],
+      "swing_peak_median_m": [
+        0.03162822127342224,
+        0.01982247829437256,
+        0.030366629362106323,
+        0.03210762143135071
+      ],
+      "swing_duration_median_s": [
+        0.24,
+        0.2,
+        0.22,
+        0.24
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.23148148148148148,
+        0.27,
+        0.24528301886792453,
+        0.23423423423423423
+      ],
+      "airborne_fraction": [
+        0.36,
+        0.3333333333333333,
+        0.35333333333333333,
+        0.37
+      ],
+      "feet_without_completed_swing": []
+    },
+    "backward_turn_0_right": {
+      "command": [
+        -0.3,
+        -0.0,
+        -0.25
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.018529306189806305,
+        0.009142249616001658,
+        0.025062788076221674
+      ],
+      "clearance_p95_m": [
+        0.01971381343901158,
+        0.03301157616078854,
+        0.031587824970483784,
+        0.028404566645622256
+      ],
+      "exclusive_diagonal": 0.6733333333333333,
+      "slip": 0.027096774193548386,
+      "swing_count": [
+        10,
+        9,
+        9,
+        10
+      ],
+      "swing_peak_median_m": [
+        0.020095687359571457,
+        0.034581705927848816,
+        0.031555190682411194,
+        0.02947773039340973
+      ],
+      "swing_duration_median_s": [
+        0.2,
+        0.24,
+        0.24,
+        0.22
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.25,
+        0.18095238095238095,
+        0.22321428571428573,
+        0.25925925925925924
+      ],
+      "airborne_fraction": [
+        0.3333333333333333,
+        0.35,
+        0.37333333333333335,
+        0.36
+      ],
+      "feet_without_completed_swing": []
+    },
+    "lateral_counterturn_1_left": {
+      "command": [
+        0.0,
+        0.37,
+        -0.14
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.006556121737362597,
+        0.022220547401755712,
+        0.0257779748039097
+      ],
+      "clearance_p95_m": [
+        0.01728615835309029,
+        0.026784886047244074,
+        0.016815683990716934,
+        0.018350620567798615
+      ],
+      "exclusive_diagonal": 0.45666666666666667,
+      "slip": 0.05415162454873646,
+      "swing_count": [
+        11,
+        11,
+        12,
+        11
+      ],
+      "swing_peak_median_m": [
+        0.018458694219589233,
+        0.027359023690223694,
+        0.018574349582195282,
+        0.01975918561220169
+      ],
+      "swing_duration_median_s": [
+        0.12,
+        0.18,
+        0.12,
+        0.22
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.34328358208955223,
+        0.21875,
+        0.4861111111111111,
+        0.2032520325203252
+      ],
+      "airborne_fraction": [
+        0.23,
+        0.3433333333333333,
+        0.24,
+        0.4166666666666667
+      ],
+      "feet_without_completed_swing": []
+    },
+    "lateral_counterturn_1_right": {
+      "command": [
+        0.0,
+        -0.37,
+        0.14
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.006571759267139658,
+        0.021842962092089174,
+        0.025841134977439926
+      ],
+      "clearance_p95_m": [
+        0.026620298996567725,
+        0.01703338921070099,
+        0.01833130531013012,
+        0.017117639631032945
+      ],
+      "exclusive_diagonal": 0.4533333333333333,
+      "slip": 0.05875299760191847,
+      "swing_count": [
+        11,
+        11,
+        11,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.02720324695110321,
+        0.018214374780654907,
+        0.019702382385730743,
+        0.018450148403644562
+      ],
+      "swing_duration_median_s": [
+        0.18,
+        0.12,
+        0.22,
+        0.12
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.19791666666666666,
+        0.3787878787878788,
+        0.18181818181818182,
+        0.5
+      ],
+      "airborne_fraction": [
+        0.34,
+        0.22666666666666666,
+        0.41333333333333333,
+        0.24
+      ],
+      "feet_without_completed_swing": []
+    },
+    "lateral_turn_2_left": {
+      "command": [
+        0.0,
+        0.1,
+        0.53
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.005158821493180573,
+        0.01146298830598205,
+        0.015916642279195092
+      ],
+      "clearance_p95_m": [
+        0.022555327415466307,
+        0.02674548588693142,
+        0.017368633672595037,
+        0.015776105970144273
+      ],
+      "exclusive_diagonal": 0.46,
+      "slip": 0.013498312710911136,
+      "swing_count": [
+        9,
+        10,
+        10,
+        9
+      ],
+      "swing_peak_median_m": [
+        0.02544534206390381,
+        0.028368301689624786,
+        0.0193263441324234,
+        0.016551904380321503
+      ],
+      "swing_duration_median_s": [
+        0.12,
+        0.16,
+        0.16,
+        0.16
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.38181818181818183,
+        0.32051282051282054,
+        0.4634146341463415,
+        0.40789473684210525
+      ],
+      "airborne_fraction": [
+        0.21333333333333335,
+        0.26,
+        0.2733333333333333,
+        0.29
+      ],
+      "feet_without_completed_swing": []
+    },
+    "lateral_turn_2_right": {
+      "command": [
+        0.0,
+        -0.1,
+        -0.53
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.005188518124761473,
+        0.011406863721230363,
+        0.016908402249791624
+      ],
+      "clearance_p95_m": [
+        0.027460232377052307,
+        0.022189010679721836,
+        0.016303820163011552,
+        0.01756407469511033
+      ],
+      "exclusive_diagonal": 0.4633333333333333,
+      "slip": 0.020247469066366704,
+      "swing_count": [
+        10,
+        9,
+        9,
+        10
+      ],
+      "swing_peak_median_m": [
+        0.029404807835817337,
+        0.024379044771194458,
+        0.017345592379570007,
+        0.019471175968647003
+      ],
+      "swing_duration_median_s": [
+        0.16,
+        0.12,
+        0.18,
+        0.16
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.2948717948717949,
+        0.375,
+        0.38961038961038963,
+        0.43037974683544306
+      ],
+      "airborne_fraction": [
+        0.26,
+        0.22,
+        0.29333333333333333,
+        0.2633333333333333
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_bridge_left": {
+      "command": [
+        0.55,
+        0.25,
+        0.0
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.02332648747597033,
+        0.02161185524059992,
+        0.05128851631196997
+      ],
+      "clearance_p95_m": [
+        0.014039482921361925,
+        0.03057691976428032,
+        0.025110478326678277,
+        0.029856443405151367
+      ],
+      "exclusive_diagonal": 0.5566666666666666,
+      "slip": 0.05012853470437018,
+      "swing_count": [
+        11,
+        11,
+        11,
+        11
+      ],
+      "swing_peak_median_m": [
+        0.016094699501991272,
+        0.031442806124687195,
+        0.026422493159770966,
+        0.030676573514938354
+      ],
+      "swing_duration_median_s": [
+        0.1,
+        0.18,
+        0.22,
+        0.22
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.5,
+        0.2980769230769231,
+        0.5454545454545454,
+        0.22764227642276422
+      ],
+      "swing_sample_count": [
+        56,
+        104,
+        121,
+        123
+      ],
+      "airborne_fraction": [
+        0.19333333333333333,
+        0.36333333333333334,
+        0.42333333333333334,
+        0.4266666666666667
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_diagonal_bridge_right": {
+      "command": [
+        0.55,
+        -0.25,
+        -0.0
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.022916283971636146,
+        0.02217739978813709,
+        0.051373749631984995
+      ],
+      "clearance_p95_m": [
+        0.03011828772723675,
+        0.01378111131489277,
+        0.02997991219162941,
+        0.025202356651425364
+      ],
+      "exclusive_diagonal": 0.5533333333333333,
+      "slip": 0.04884318766066838,
+      "swing_count": [
+        11,
+        11,
+        11,
+        11
+      ],
+      "swing_peak_median_m": [
+        0.031146064400672913,
+        0.01549878716468811,
+        0.03060586005449295,
+        0.026351898908615112
+      ],
+      "swing_duration_median_s": [
+        0.18,
+        0.1,
+        0.22,
+        0.22
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.27884615384615385,
+        0.5636363636363636,
+        0.2066115702479339,
+        0.5564516129032258
+      ],
+      "swing_sample_count": [
+        104,
+        55,
+        121,
+        124
+      ],
+      "airborne_fraction": [
+        0.36333333333333334,
+        0.19,
+        0.42,
+        0.43333333333333335
+      ],
+      "feet_without_completed_swing": []
+    },
+    "lateral_turn_1_left": {
+      "command": [
+        0.0,
+        0.37,
+        0.14
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.00853025328440424,
+        0.018757895075117176,
+        0.023229711987751117
+      ],
+      "clearance_p95_m": [
+        0.029698370397090914,
+        0.022547832131385805,
+        0.014941963553428651,
+        0.018659696355462073
+      ],
+      "exclusive_diagonal": 0.53,
+      "slip": 0.033210332103321034,
+      "swing_count": [
+        11,
+        11,
+        12,
+        11
+      ],
+      "swing_peak_median_m": [
+        0.03164041042327881,
+        0.02370116114616394,
+        0.015271224081516266,
+        0.019280709326267242
+      ],
+      "swing_duration_median_s": [
+        0.16,
+        0.18,
+        0.12,
+        0.22
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.3488372093023256,
+        0.30612244897959184,
+        0.4852941176470588,
+        0.3220338983050847
+      ],
+      "swing_sample_count": [
+        86,
+        98,
+        68,
+        118
+      ],
+      "airborne_fraction": [
+        0.30333333333333334,
+        0.3466666666666667,
+        0.22666666666666666,
+        0.41333333333333333
+      ],
+      "feet_without_completed_swing": []
+    },
+    "lateral_turn_1_right": {
+      "command": [
+        0.0,
+        -0.37,
+        -0.14
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.008526152801000332,
+        0.018558423044036453,
+        0.023104055288466985
+      ],
+      "clearance_p95_m": [
+        0.02256838791072369,
+        0.030542851984500886,
+        0.018462441489100458,
+        0.014954449981451035
+      ],
+      "exclusive_diagonal": 0.5233333333333333,
+      "slip": 0.03558282208588957,
+      "swing_count": [
+        11,
+        11,
+        11,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.024814732372760773,
+        0.0323997437953949,
+        0.020000092685222626,
+        0.015603654086589813
+      ],
+      "swing_duration_median_s": [
+        0.18,
+        0.16,
+        0.22,
+        0.12
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.2916666666666667,
+        0.32558139534883723,
+        0.3305084745762712,
+        0.47058823529411764
+      ],
+      "swing_sample_count": [
+        96,
+        86,
+        118,
+        68
+      ],
+      "airborne_fraction": [
+        0.34,
+        0.30333333333333334,
+        0.41333333333333333,
+        0.22666666666666666
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_turn_1_left": {
+      "command": [
+        0.65,
+        0.0,
+        0.14
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.014294924290786134,
+        0.011007522229135537,
+        0.023002106806754307
+      ],
+      "clearance_p95_m": [
+        0.020613596960902213,
+        0.018956956267356873,
+        0.013743257522583008,
+        0.024472792446613312
+      ],
+      "exclusive_diagonal": 0.5,
+      "slip": 0.046192259675405745,
+      "swing_count": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.02215639129281044,
+        0.01911870390176773,
+        0.01742400974035263,
+        0.02782159298658371
+      ],
+      "swing_duration_median_s": [
+        0.12,
+        0.12,
+        0.2,
+        0.2
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.3333333333333333,
+        0.4861111111111111,
+        0.3333333333333333,
+        0.22413793103448276
+      ],
+      "airborne_fraction": [
+        0.24333333333333335,
+        0.25666666666666665,
+        0.43333333333333335,
+        0.39666666666666667
+      ],
+      "feet_without_completed_swing": []
+    },
+    "forward_turn_1_right": {
+      "command": [
+        0.65,
+        -0.0,
+        -0.14
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.014034521825722549,
+        0.011114237541435043,
+        0.022009879937919724
+      ],
+      "clearance_p95_m": [
+        0.019019410386681555,
+        0.02055865563452244,
+        0.02422918900847435,
+        0.013574914634227752
+      ],
+      "exclusive_diagonal": 0.5,
+      "slip": 0.045,
+      "swing_count": [
+        12,
+        12,
+        12,
+        12
+      ],
+      "swing_peak_median_m": [
+        0.019237011671066284,
+        0.021984566003084183,
+        0.02767965942621231,
+        0.017276816070079803
+      ],
+      "swing_duration_median_s": [
+        0.12,
+        0.12,
+        0.2,
+        0.2
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.5,
+        0.3333333333333333,
+        0.211864406779661,
+        0.36065573770491804
+      ],
+      "airborne_fraction": [
+        0.25666666666666665,
+        0.24333333333333335,
+        0.4033333333333333,
+        0.43
+      ],
+      "feet_without_completed_swing": []
+    },
+    "backward_turn_2_left": {
+      "command": [
+        -0.17,
+        0.0,
+        0.53
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.008388920778046368,
+        0.01245152317166438,
+        0.026778395965752173
+      ],
+      "clearance_p95_m": [
+        0.034200490638613704,
+        0.017434588447213174,
+        0.017338328063488017,
+        0.04391438104212284
+      ],
+      "exclusive_diagonal": 0.5366666666666666,
+      "slip": 0.012004801920768308,
+      "swing_count": [
+        8,
+        9,
+        9,
+        8
+      ],
+      "swing_peak_median_m": [
+        0.03295647352933884,
+        0.01786763221025467,
+        0.01652546226978302,
+        0.046220287680625916
+      ],
+      "swing_duration_median_s": [
+        0.21,
+        0.18,
+        0.16,
+        0.26
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.2619047619047619,
+        0.34523809523809523,
+        0.3625,
+        0.2912621359223301
+      ],
+      "swing_sample_count": [
+        84,
+        84,
+        80,
+        103
+      ],
+      "airborne_fraction": [
+        0.30666666666666664,
+        0.28,
+        0.26666666666666666,
+        0.37
+      ],
+      "feet_without_completed_swing": []
+    },
+    "backward_turn_2_right": {
+      "command": [
+        -0.17,
+        -0.0,
+        -0.53
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.00800217454709363,
+        0.011807085178735008,
+        0.027903980960835302
+      ],
+      "clearance_p95_m": [
+        0.01792946681380272,
+        0.03345373421907425,
+        0.044386356323957446,
+        0.016878731548786163
+      ],
+      "exclusive_diagonal": 0.5266666666666666,
+      "slip": 0.02026221692491061,
+      "swing_count": [
+        9,
+        8,
+        8,
+        9
+      ],
+      "swing_peak_median_m": [
+        0.018432356417179108,
+        0.0333491750061512,
+        0.04658659175038338,
+        0.01724962890148163
+      ],
+      "swing_duration_median_s": [
+        0.18,
+        0.21,
+        0.24,
+        0.16
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.3493975903614458,
+        0.23809523809523808,
+        0.24242424242424243,
+        0.379746835443038
+      ],
+      "swing_sample_count": [
+        83,
+        84,
+        99,
+        79
+      ],
+      "airborne_fraction": [
+        0.27666666666666667,
+        0.30666666666666664,
+        0.3566666666666667,
+        0.2633333333333333
+      ],
+      "feet_without_completed_swing": []
+    },
+    "lateral_turn_0_left": {
+      "command": [
+        0.0,
+        0.23,
+        0.2
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.007908997291366512,
+        0.009609636485442899,
+        0.017097025361422276
+      ],
+      "clearance_p95_m": [
+        0.018515664339065555,
+        0.02372199557721615,
+        0.014484268426895144,
+        0.02803144007921219
+      ],
+      "exclusive_diagonal": 0.43333333333333335,
+      "slip": 0.014302741358760428,
+      "swing_count": [
+        10,
+        10,
+        10,
+        9
+      ],
+      "swing_peak_median_m": [
+        0.01954743266105652,
+        0.02422439306974411,
+        0.016288988292217255,
+        0.029161758720874786
+      ],
+      "swing_duration_median_s": [
+        0.14,
+        0.18,
+        0.14,
+        0.24
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.4084507042253521,
+        0.26666666666666666,
+        0.5068493150684932,
+        0.2909090909090909
+      ],
+      "swing_sample_count": [
+        71,
+        90,
+        73,
+        110
+      ],
+      "airborne_fraction": [
+        0.23666666666666666,
+        0.3,
+        0.24333333333333335,
+        0.42333333333333334
+      ],
+      "feet_without_completed_swing": []
+    },
+    "lateral_turn_0_right": {
+      "command": [
+        0.0,
+        -0.23,
+        -0.2
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.008076234673501357,
+        0.009598082076791685,
+        0.017789831668325075
+      ],
+      "clearance_p95_m": [
+        0.021796163916587834,
+        0.01837752908468247,
+        0.027819721773266793,
+        0.015379104018211368
+      ],
+      "exclusive_diagonal": 0.43333333333333335,
+      "slip": 0.014302741358760428,
+      "swing_count": [
+        10,
+        10,
+        9,
+        10
+      ],
+      "swing_peak_median_m": [
+        0.02455354481935501,
+        0.019597768783569336,
+        0.028711475431919098,
+        0.016476280987262726
+      ],
+      "swing_duration_median_s": [
+        0.18,
+        0.14,
+        0.24,
+        0.14
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.25842696629213485,
+        0.42857142857142855,
+        0.3063063063063063,
+        0.4864864864864865
+      ],
+      "swing_sample_count": [
+        89,
+        70,
+        111,
+        74
+      ],
+      "airborne_fraction": [
+        0.2966666666666667,
+        0.23333333333333334,
+        0.4266666666666667,
+        0.24666666666666667
+      ],
+      "feet_without_completed_swing": []
+    },
+    "slow_lateral_16_left": {
+      "command": [
+        0.0,
+        0.16,
+        0.0
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.004329606321816462,
+        0.011092495230325577,
+        0.019002362871195628
+      ],
+      "clearance_p95_m": [
+        0.013742950931191445,
+        0.022405927255749702,
+        0.01633880138397217,
+        0.026276035234332085
+      ],
+      "exclusive_diagonal": 0.36,
+      "slip": 0.019562715765247412,
+      "swing_count": [
+        9,
+        9,
+        9,
+        9
+      ],
+      "swing_peak_median_m": [
+        0.015178948640823364,
+        0.023348025977611542,
+        0.01772288978099823,
+        0.02698967605829239
+      ],
+      "swing_duration_median_s": [
+        0.14,
+        0.16,
+        0.14,
+        0.28
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.5666666666666667,
+        0.25,
+        0.45161290322580644,
+        0.25
+      ],
+      "swing_sample_count": [
+        60,
+        72,
+        62,
+        128
+      ],
+      "airborne_fraction": [
+        0.21666666666666667,
+        0.24,
+        0.20666666666666667,
+        0.44
+      ],
+      "feet_without_completed_swing": []
+    },
+    "slow_lateral_16_right": {
+      "command": [
+        0.0,
+        -0.16,
+        -0.0
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.004362153968263933,
+        0.01114165419879438,
+        0.019479126786963914
+      ],
+      "clearance_p95_m": [
+        0.021224510297179228,
+        0.013804719969630242,
+        0.025481922924518587,
+        0.016357381641864777
+      ],
+      "exclusive_diagonal": 0.36,
+      "slip": 0.021889400921658985,
+      "swing_count": [
+        9,
+        9,
+        9,
+        9
+      ],
+      "swing_peak_median_m": [
+        0.022968679666519165,
+        0.015448987483978271,
+        0.02578987181186676,
+        0.017987221479415894
+      ],
+      "swing_duration_median_s": [
+        0.16,
+        0.14,
+        0.28,
+        0.14
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.28378378378378377,
+        0.532258064516129,
+        0.2440944881889764,
+        0.4
+      ],
+      "swing_sample_count": [
+        74,
+        62,
+        127,
+        60
+      ],
+      "airborne_fraction": [
+        0.24666666666666667,
+        0.22333333333333333,
+        0.43666666666666665,
+        0.2
+      ],
+      "feet_without_completed_swing": []
+    },
+    "slow_lateral_18_left": {
+      "command": [
+        0.0,
+        0.18,
+        0.0
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.00474830863185154,
+        0.011115668408785308,
+        0.019314431749570222
+      ],
+      "clearance_p95_m": [
+        0.015360935777425767,
+        0.021737460419535642,
+        0.01708156988024712,
+        0.025700732320547103
+      ],
+      "exclusive_diagonal": 0.38666666666666666,
+      "slip": 0.01764705882352941,
+      "swing_count": [
+        9,
+        9,
+        9,
+        8
+      ],
+      "swing_peak_median_m": [
+        0.016500920057296753,
+        0.022599175572395325,
+        0.019319787621498108,
+        0.026035107672214508
+      ],
+      "swing_duration_median_s": [
+        0.14,
+        0.16,
+        0.14,
+        0.29
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.47619047619047616,
+        0.2631578947368421,
+        0.4444444444444444,
+        0.2672413793103448
+      ],
+      "swing_sample_count": [
+        63,
+        76,
+        63,
+        116
+      ],
+      "airborne_fraction": [
+        0.22666666666666666,
+        0.25333333333333335,
+        0.21,
+        0.4766666666666667
+      ],
+      "feet_without_completed_swing": []
+    },
+    "slow_lateral_18_right": {
+      "command": [
+        0.0,
+        -0.18,
+        -0.0
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.004485723901420678,
+        0.011113984958497105,
+        0.018907079358712667
+      ],
+      "clearance_p95_m": [
+        0.023210527002811437,
+        0.014739928394556045,
+        0.025701137259602547,
+        0.016655230522155763
+      ],
+      "exclusive_diagonal": 0.38,
+      "slip": 0.019883040935672516,
+      "swing_count": [
+        9,
+        9,
+        8,
+        9
+      ],
+      "swing_peak_median_m": [
+        0.025040216743946075,
+        0.016732245683670044,
+        0.026295829564332962,
+        0.01849798858165741
+      ],
+      "swing_duration_median_s": [
+        0.16,
+        0.14,
+        0.28,
+        0.14
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.20270270270270271,
+        0.5,
+        0.26548672566371684,
+        0.45161290322580644
+      ],
+      "swing_sample_count": [
+        74,
+        64,
+        113,
+        62
+      ],
+      "airborne_fraction": [
+        0.24666666666666667,
+        0.23,
+        0.4666666666666667,
+        0.20666666666666667
+      ],
+      "feet_without_completed_swing": []
+    },
+    "slow_lateral_20_left": {
+      "command": [
+        0.0,
+        0.2,
+        0.0
+      ],
+      "mirrored_teacher": false,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.0045007720643154715,
+        0.010735614386753472,
+        0.01853548565665979
+      ],
+      "clearance_p95_m": [
+        0.0162012092769146,
+        0.024642066657543184,
+        0.01720539927482605,
+        0.026106170564889907
+      ],
+      "exclusive_diagonal": 0.39666666666666667,
+      "slip": 0.015366430260047281,
+      "swing_count": [
+        9,
+        9,
+        9,
+        9
+      ],
+      "swing_peak_median_m": [
+        0.017986491322517395,
+        0.02526339888572693,
+        0.019611850380897522,
+        0.026915498077869415
+      ],
+      "swing_duration_median_s": [
+        0.14,
+        0.16,
+        0.14,
+        0.28
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.47692307692307695,
+        0.125,
+        0.42857142857142855,
+        0.30158730158730157
+      ],
+      "swing_sample_count": [
+        65,
+        72,
+        63,
+        126
+      ],
+      "airborne_fraction": [
+        0.22666666666666666,
+        0.26666666666666666,
+        0.23,
+        0.45666666666666667
+      ],
+      "feet_without_completed_swing": []
+    },
+    "slow_lateral_20_right": {
+      "command": [
+        0.0,
+        -0.2,
+        -0.0
+      ],
+      "mirrored_teacher": true,
+      "passed": true,
+      "physical_failure": false,
+      "velocity_rmse": [
+        0.004503422307418155,
+        0.010781805145817742,
+        0.018405750597870356
+      ],
+      "clearance_p95_m": [
+        0.024870653077960016,
+        0.016307184100151063,
+        0.026112935692071914,
+        0.017366592586040498
+      ],
+      "exclusive_diagonal": 0.39666666666666667,
+      "slip": 0.016548463356973995,
+      "swing_count": [
+        9,
+        9,
+        9,
+        9
+      ],
+      "swing_peak_median_m": [
+        0.025448039174079895,
+        0.018213018774986267,
+        0.026806756854057312,
+        0.01967024803161621
+      ],
+      "swing_duration_median_s": [
+        0.16,
+        0.14,
+        0.28,
+        0.14
+      ],
+      "swing_peak_below_1cm_fraction": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "swing_samples_below_1cm_fraction": [
+        0.125,
+        0.4153846153846154,
+        0.2857142857142857,
+        0.3968253968253968
+      ],
+      "swing_sample_count": [
+        72,
+        65,
+        126,
+        63
+      ],
+      "airborne_fraction": [
+        0.26666666666666666,
+        0.22666666666666666,
+        0.45666666666666667,
+        0.23
+      ],
+      "feet_without_completed_swing": []
+    }
+  }
+}

@@ -1,10 +1,12 @@
 {
-  "robot_revision": "box_mount_rails_v9",
+  "schema_version": 1,
+  "snapshot": "v11_standing_support",
+  "all_runtime_assets_included": true,
   "files": {
     "controller_bench_report.json": "300b7e6bcd3f917f2b29f1b601b1194f7ae3997b7751ceb84e2ee69449ea1c55",
-    "path_bank.npz": "cd5a47b7f3491b67d5f0a9c7baf8134c0cf99fdbdad4cba030ac2ff891e0de89",
-    "whole_body_bank.npz": "3dfcd07a257a4b063d4bb0f645c04bae6f909d1933703f7e7d8b05c477d5f9c7",
     "head_vertices.npy": "10f9d3745b319a3aac489995c1fd475d1d46187513a83b76a182642c38fb7678",
+    "path_bank.npz": "cd5a47b7f3491b67d5f0a9c7baf8134c0cf99fdbdad4cba030ac2ff891e0de89",
+    "repair_metadata.json": "c1c4477c54ee3fe745b416cacc680bb1680b1ed54a10579ad2a586a772fe4de6",
     "robot/assets/base_0.stl": "87222772abd459c0d1069e97c1881c28a17b22475ba05172f581f8014bca7bf5",
     "robot/assets/base_1.stl": "0b48e2976c050925c22d0646f35f3365425ac74c45f60ab72680b300ad5e3afd",
     "robot/assets/base_2.stl": "4891b21d9623561212ebd270ff40f4de6e18338d260cd7eac45a539adaa0fcb5",
@@ -105,12 +107,14 @@
     "robot/robot_mjcf.xml": "b08389848807a4cf08cd5f9dacfda05ef5d2868bf37e003df22d200a11df9418",
     "robot/scene.xml": "1da24cb07cb01fd4407a7e0e642a5553ebe5ccb136b26215ee3764dc417e9cdf",
     "robot/usd/.asset_hash": "b27f3d966589575cd6a5f0b3e529ecdb9e4dc0b495ebc7651aa9fee74c2277e9",
-    "robot/usd/config.yaml": "5554b22e7a849c7674749f7c58a102644207c6631e0eff08e9cb0d6a99ffce6f",
+    "robot/usd/config.yaml": "e7b937ed07fbf642bd6a7c2923445eb52d9afb5553f93ae9c93b8d67f0937858",
     "robot/usd/configuration/robot_base.usd": "10a826e6543401e8640997f5ff7fe15990bfbb79e4bfcf6570dd7d5ee7cff602",
     "robot/usd/configuration/robot_physics.usd": "20a0ce32c21f9437143086330da5f20cb8bec3dd81fd764b59d95384820cb39a",
     "robot/usd/configuration/robot_robot.usd": "8203fb1fa0869500c5f7a3966a643865d11a370f05920c41ace88c26ea320dc7",
     "robot/usd/configuration/robot_sensor.usd": "f1eb95497dea89046ab398ba30f424877541a4b1bbac98af3cdced86458c1444",
-    "robot/usd/robot.usd": "83d57aff13953a6ded47229fc9ac2b264f7516a1bedfa212de4523c81c7cc4a4"
+    "robot/usd/robot.usd": "83d57aff13953a6ded47229fc9ac2b264f7516a1bedfa212de4523c81c7cc4a4",
+    "robot/usd/robot_contact_split.usda": "543a2f43dae4aa72a5e21c23cf5936eeb57d1838a0f96a16820eac4d7638da1e",
+    "whole_body_bank.npz": "3dfcd07a257a4b063d4bb0f645c04bae6f909d1933703f7e7d8b05c477d5f9c7"
   },
   "amp_reference": {
     "repository": "https://github.com/ak1raljl/amp_go2",
@@ -135,5 +139,9 @@
       "go2_turn_right_fast.txt": "540b401bc7ea918aebe9d18a1b451aed9ec5a6586c8d00c15df8c7e902f84b8d",
       "go2_turn_right_faster.txt": "be8b74325bbb6cd8a82a1248b3e3a5e44d9f83620a442cd604c4e35e4813c83c"
     }
+  },
+  "supplemental_recordings": {
+    "manifest": "go2_arm/amp_reference/recording_manifest.json",
+    "clips": 40
   }
 }

@@ -1,0 +1,157 @@
+{
+  "test": "fixed-base PhysX arm reference tracking; no learned policy",
+  "base_pitch_tested_deg": [
+    -15.0,
+    0.0,
+    15.0
+  ],
+  "gains": [
+    {
+      "joint_omega_rad_s": [
+        15.0,
+        15.0,
+        18.0,
+        18.0,
+        15.0,
+        15.0
+      ],
+      "omega_rad_s": 15.0,
+      "damping_ratio": 1.3,
+      "cases": 105,
+      "joint_rmse_each_deg": [
+        0.05253605613192822,
+        0.039179737595793046,
+        0.03368263672149455,
+        0.11112918226507028,
+        0.11473226543897747,
+        0.13157681347491296
+      ],
+      "joint_abs_error_p95_each_deg": [
+        0.10092769279266264,
+        0.08721619701686195,
+        0.08888252302506898,
+        0.2322618790583296,
+        0.21585009704139657,
+        0.2936743600024005
+      ],
+      "tcp_position_rmse_m": 0.0003588514046540089,
+      "tcp_position_p95_m": 0.0008123415290055042,
+      "tcp_orientation_rmse_deg": 0.14295441427613734,
+      "tcp_orientation_p95_deg": 0.27777499345879625,
+      "max_joint_overshoot_deg": 0.03871105731177849,
+      "max_joint_settled_peak_to_peak_deg": 0.03661397472023964,
+      "max_tcp_settled_peak_to_peak_m": 0.00020731364352364747,
+      "max_error_sign_crossings_outside_deadband": 0,
+      "settled_joint_rmse_each_deg": [
+        0.06032459841542666,
+        0.04558670022197546,
+        0.03894521123803119,
+        0.12757670998133325,
+        0.13119916824076722,
+        0.14939627655670112
+      ],
+      "cases_with_contact": 0,
+      "cases_with_saturation": 0,
+      "isolated_arm_gate_passed": true
+    },
+    {
+      "joint_omega_rad_s": [
+        15.0,
+        15.0,
+        18.0,
+        18.0,
+        18.0,
+        15.0
+      ],
+      "omega_rad_s": 15.0,
+      "damping_ratio": 1.3,
+      "cases": 105,
+      "joint_rmse_each_deg": [
+        0.052691393979367555,
+        0.03982825290635032,
+        0.034977863286239134,
+        0.11092688419534079,
+        0.10014925732811505,
+        0.13157147574128084
+      ],
+      "joint_abs_error_p95_each_deg": [
+        0.1017054225907419,
+        0.08715131021974683,
+        0.09187756097611957,
+        0.23207814696965626,
+        0.18944988223409331,
+        0.293676067549693
+      ],
+      "tcp_position_rmse_m": 0.00031966946668724095,
+      "tcp_position_p95_m": 0.0007047768932648792,
+      "tcp_orientation_rmse_deg": 0.13378480694225967,
+      "tcp_orientation_p95_deg": 0.2419788389673295,
+      "max_joint_overshoot_deg": 0.04168731224261155,
+      "max_joint_settled_peak_to_peak_deg": 0.0384017750620842,
+      "max_tcp_settled_peak_to_peak_m": 0.0002521977711876701,
+      "max_error_sign_crossings_outside_deadband": 0,
+      "settled_joint_rmse_each_deg": [
+        0.06053612235179718,
+        0.04637862227782504,
+        0.04077159273187714,
+        0.12727004660243207,
+        0.11511583433238574,
+        0.14939080022743603
+      ],
+      "cases_with_contact": 0,
+      "cases_with_saturation": 0,
+      "isolated_arm_gate_passed": true
+    }
+  ],
+  "selected": {
+    "joint_omega_rad_s": [
+      15.0,
+      15.0,
+      18.0,
+      18.0,
+      18.0,
+      15.0
+    ],
+    "omega_rad_s": 15.0,
+    "damping_ratio": 1.3,
+    "cases": 105,
+    "joint_rmse_each_deg": [
+      0.052691393979367555,
+      0.03982825290635032,
+      0.034977863286239134,
+      0.11092688419534079,
+      0.10014925732811505,
+      0.13157147574128084
+    ],
+    "joint_abs_error_p95_each_deg": [
+      0.1017054225907419,
+      0.08715131021974683,
+      0.09187756097611957,
+      0.23207814696965626,
+      0.18944988223409331,
+      0.293676067549693
+    ],
+    "tcp_position_rmse_m": 0.00031966946668724095,
+    "tcp_position_p95_m": 0.0007047768932648792,
+    "tcp_orientation_rmse_deg": 0.13378480694225967,
+    "tcp_orientation_p95_deg": 0.2419788389673295,
+    "max_joint_overshoot_deg": 0.04168731224261155,
+    "max_joint_settled_peak_to_peak_deg": 0.0384017750620842,
+    "max_tcp_settled_peak_to_peak_m": 0.0002521977711876701,
+    "max_error_sign_crossings_outside_deadband": 0,
+    "settled_joint_rmse_each_deg": [
+      0.06053612235179718,
+      0.04637862227782504,
+      0.04077159273187714,
+      0.12727004660243207,
+      0.11511583433238574,
+      0.14939080022743603
+    ],
+    "cases_with_contact": 0,
+    "cases_with_saturation": 0,
+    "isolated_arm_gate_passed": true
+  },
+  "whole_body_and_policy_gate_passed": false,
+  "selection_basis": "Isolated joint5 15->18rad/s intervention after reproduced17000 joint5 regression: dynamic screen and105-case folded-home precision gate passed. Whole-body policy acceptance remains false.",
+  "controller_revision": "arm5_bandwidth_v7"
+}

@@ -1,0 +1,15 @@
+* text=auto
+*.py text eol=lf
+*.sh text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.urdf text eol=lf
+*.xml text eol=lf
+*.usda text eol=lf
+*.stl binary
+*.STL binary
+*.usd binary
+*.npz binary
+*.npy binary
+# OBJ meshes are source assets and must remain tracked.
+*.obj -text
